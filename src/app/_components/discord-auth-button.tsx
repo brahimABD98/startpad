@@ -9,7 +9,7 @@ const DiscordAuthButton = () => {
       onClick={() => signIn("discord", { callbackUrl: "/dashboard" })}
       className="w-full"
     >
-      Login with Google
+      Login with Discord
     </Button>
   );
 };

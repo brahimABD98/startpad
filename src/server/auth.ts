@@ -6,12 +6,12 @@ import {
 } from "next-auth";
 import { type Adapter } from "next-auth/adapters";
 import DiscordProvider from "next-auth/providers/discord";
-
+import GoogleProvider from "next-auth/providers/google";
 import { env } from "@/env";
 import { db } from "@/server/db";
 import { createTable } from "@/server/db/schema";
-import  CredentialsProvider  from "next-auth/providers/credentials";
-import Email from "next-auth/providers/email";
+import GitHubProvider from "next-auth/providers/github";
+
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -28,10 +28,11 @@ declare module "next-auth" {
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    phoneNumber?: string;
+    // ...other properties
+    // role: UserRole;
+  }
 }
 
 /**
@@ -55,6 +56,14 @@ export const authOptions: NextAuthOptions = {
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
     }),  
+    GoogleProvider({
+      clientId:env.GOOGLE_CLIENT_ID,
+      clientSecret:env.GOOGLE_CLIENT_SECRET,
+    }),
+    GitHubProvider({
+      clientId:env.GITHUB_CLIENT_ID,
+      clientSecret:env.GITHUB_CLIENT_SECRET,
+    }),
     /**
      * ...add more providers here.
      *

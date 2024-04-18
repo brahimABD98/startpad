@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import DiscordAuthButton from "@/app/_components/discord-auth-button";
+import GoogleSignInButton from "@/app/_components/GoogleSignInButton";
+import GithubSignInButton from "@/app/_components/GithubSignInButton";
 
 export default function Signin() {
   return (
@@ -32,6 +34,8 @@ export default function Signin() {
               Login
             </Button>
             <DiscordAuthButton />
+            <GoogleSignInButton />
+            <GithubSignInButton />
           </div>
           <div className="mt-4 text-center text-sm">
             Don&apos;t have an account?{" "}

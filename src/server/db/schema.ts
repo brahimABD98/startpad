@@ -38,15 +38,17 @@ export const posts = createTable(
   })
 );
 
-export const  startup = createTable("startup",{
+export const  startups = createTable("startup",{
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
   name: varchar("name", { length: 256 }),
+  logo_url:varchar("logo_url", {length:255} ),
   description: text("description"),
+  founderId:varchar('founderId',{length:255}).notNull().references(()=>users.id),
   createdById: varchar("createdById", { length: 255 })
     .notNull()
     .references(() => users.id),
-  createdAt: timestamp("created_at")
-    .default(sql`CURRENT_TIMESTAMP(3)`)
+    createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
   
@@ -62,11 +64,13 @@ export const users = createTable("user", {
     fsp: 3,
   }).default(sql`CURRENT_TIMESTAMP(3)`),
   image: varchar("image", { length: 255 }),
+  phoneNumber : varchar("phoneNumber", { length: 50 }),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
+  startup:many(startups)
 }));
 
 export const accounts = createTable(

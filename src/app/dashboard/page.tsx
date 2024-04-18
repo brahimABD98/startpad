@@ -16,15 +16,7 @@ import {
   Users2,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -61,13 +53,15 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { getServerAuthSession } from "@/server/auth";
+import { getUserStartups } from "@/server/queries";
+import Nav from "../_components/Nav";
 
 export default async function Page() {
   const session = await getServerAuthSession();
   if (!session?.user) return null;
-
+  const startups = await getUserStartups();
   return (
-    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+    <div className="flex min-h-screen w-full flex-col  bg-muted/40">
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
         <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
           <Link
@@ -109,95 +103,12 @@ export default async function Page() {
           </TooltipProvider>
         </nav>
       </aside>
-      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button size="icon" variant="outline" className="sm:hidden">
-                <PanelLeft className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="sm:max-w-xs">
-              <nav className="grid gap-6 text-lg font-medium">
-                <Link
-                  href="#"
-                  className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-                >
-                  <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
-                  <span className="sr-only">Acme Inc</span>
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                >
-                  <Home className="h-5 w-5" />
-                  Dashboard
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
-          <Breadcrumb className="hidden md:flex">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="#">Dashboard</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="#">Startups</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="relative ml-auto flex-1 md:grow-0">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-            />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="overflow-hidden rounded-full"
-              >
-                <Image
-                  src="/placeholder-user.jpg"
-                  width={36}
-                  height={36}
-                  alt="Avatar"
-                  className="overflow-hidden rounded-full"
-                />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </header>
-        <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+      <div className="flex h-screen flex-col   sm:gap-4 sm:py-4 sm:pl-14">
+        <Nav />
+        <main className="grid flex-1  items-start gap-4  p-4 sm:px-6 sm:py-0 md:gap-8">
           <Tabs defaultValue="all">
             <div className="flex items-center">
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="active">Active</TabsTrigger>
-                <TabsTrigger value="draft">Draft</TabsTrigger>
-                <TabsTrigger value="archived" className="hidden sm:flex">
-                  Archived
-                </TabsTrigger>
-              </TabsList>
-              <div className="ml-auto flex items-center gap-2">
+              <div className="ml-auto flex items-center gap-2 ">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="h-8 gap-1">
@@ -237,37 +148,51 @@ export default async function Page() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Card className="lg:w-1/4">
-                    <CardHeader className="flex flex-row items-center gap-4 p-4">
-                      <Image
-                        alt="Thumbnail"
-                        className="rounded"
-                        height="48"
-                        src="/placeholder.svg"
-                        style={{
-                          aspectRatio: "48/48",
-                          objectFit: "cover",
-                        }}
-                        width="48"
-                      />
-                      <div className="grid gap-1">
-                        <CardTitle>example</CardTitle>
-                        <CardDescription>
-                          Example project for the prompt
-                        </CardDescription>
+                  {startups.length === 0 && (
+                    <>
+                      <div className="m-4 flex flex-1 items-center justify-center rounded-lg border border-dashed p-4 shadow-sm">
+                        <div className="flex flex-col items-center gap-1 text-center">
+                          <h3 className="text-2xl font-bold tracking-tight">
+                            You have no startups
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            You can start selling as soon as you add a startup.
+                          </p>
+                          <Button className="mt-4">Add startup</Button>
+                        </div>
                       </div>
-                      <Link className="ml-auto" href="#">
-                        <Button size="sm">Select</Button>
-                      </Link>
-                    </CardHeader>
-                  </Card>
+                    </>
+                  )}
+                  {startups.map((startup) => (
+                    <>
+                      <Card key={startup.id} className="lg:w-1/4">
+                        <CardHeader className="flex flex-row items-center gap-4 p-4">
+                          <Image
+                            alt="Thumbnail"
+                            className="rounded"
+                            height="48"
+                            src="/placeholder.svg"
+                            style={{
+                              aspectRatio: "48/48",
+                              objectFit: "cover",
+                            }}
+                            width="48"
+                          />
+                          <div className="grid gap-1">
+                            <CardTitle>{startup.name ?? "example"}</CardTitle>
+                            <CardDescription>
+                              {startup.description ?? "description exmaple "}
+                            </CardDescription>
+                          </div>
+                          <Link className="ml-auto" href="#">
+                            <Button size="sm">Select</Button>
+                          </Link>
+                        </CardHeader>
+                      </Card>
+                    </>
+                  ))}
                 </CardContent>
-                <CardFooter>
-                  <div className="text-xs text-muted-foreground">
-                    Showing <strong>1-10</strong> of <strong>32</strong>{" "}
-                    products
-                  </div>
-                </CardFooter>
+                <CardFooter></CardFooter>
               </Card>
             </TabsContent>
           </Tabs>
