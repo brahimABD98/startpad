@@ -1,11 +1,18 @@
 "use client";
+import Avatar from "boring-avatars";
+
+import {
+  Avatar as Av,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateProfile } from "@/server/actions";
-import { useSession } from "next-auth/react";
-import React from "react";
+import { PencilIcon } from "lucide-react";
+import React, { useRef } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 const initialState = {
   message: "",
@@ -21,18 +28,61 @@ function SubmitButton() {
 
 export default function UpdateProfileForm({ user }: { user: any }) {
   const [state, formAction] = useFormState(updateProfile, initialState);
-  console.warn(user)
+  const inputFileRef = useRef<HTMLInputElement>(null);
+  const handleButtonClick = () => {
+    if (inputFileRef.current) {
+      inputFileRef.current.click();
+    }
+  };
+
   return (
     <form action={formAction}>
       <fieldset>
         {user && (
           <CardContent>
-            <legend>
-              <h2 className="py-4">Personal information</h2>
-            </legend>
+            <div className="flex flex-row items-start justify-between">
+              <h2 className="py-1">Personal information</h2>
+              <div className="relative inline-block ">
+                <Av className="h-20 w-20  ">
+                  <AvatarImage alt="Avatar" src={user.image} />
+                  <AvatarFallback>
+                    <Avatar
+                      name={user.name ?? "user"}
+                      size="80"
+                      variant="marble"
+                      colors={[
+                        "#92A1C6",
+                        "#146A7C",
+                        "#F0AB3D",
+                        "#C271B4",
+                        "#C20D90",
+                      ]}
+                    />
+                  </AvatarFallback>
+                </Av>
+                <Button
+                  className=" absolute left-3 top-5 w-3/4 bg-opacity-0 p-4 hover:bg-slate-900 hover:bg-opacity-70    hover:opacity-100 lg:opacity-0"
+                  size="icon"
+                  variant="link"
+                  onClick={handleButtonClick}
+                >
+                  <PencilIcon className="h-4 w-4 text-primary-foreground" />
+                  <p className="text-xs  text-primary-foreground">Edit</p>
+
+                  <span className="sr-only">Edit avatar</span>
+                </Button>
+              </div>
+            </div>
 
             <div className="flex flex-col gap-4">
-              <input name="id" defaultValue={user.id} />
+              <input
+                type="file"
+                name="image"
+                ref={inputFileRef}
+                id="image"
+                hidden
+              />
+              <input hidden name="id" defaultValue={user.id} />
               <Label>Full name</Label>
               <Input
                 name="name"
