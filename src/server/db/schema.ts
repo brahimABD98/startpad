@@ -51,7 +51,6 @@ export const  startups = createTable("startup",{
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
-  
 });
 
 
@@ -135,3 +134,7 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   })
 );
+
+export const startupsRelations = relations(startups, ({ one }) => ({
+  user: one(users, { fields: [startups.founderId], references: [users.id] }),
+}));
