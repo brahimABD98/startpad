@@ -35,24 +35,25 @@ export const posts = createTable(
   (example) => ({
     createdByIdIdx: index("createdById_idx").on(example.createdById),
     nameIndex: index("name_idx").on(example.name),
-  })
+  }),
 );
 
-export const  startups = createTable("startup",{
+export const startups = createTable("startup", {
   id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
   name: varchar("name", { length: 256 }),
-  logo_url:varchar("logo_url", {length:255} ),
+  logo_url: varchar("logo_url", { length: 255 }),
   description: text("description"),
-  founderId:varchar('founderId',{length:255}).notNull().references(()=>users.id),
+  founderId: varchar("founderId", { length: 255 })
+    .notNull()
+    .references(() => users.id),
   createdById: varchar("createdById", { length: 255 })
     .notNull()
     .references(() => users.id),
-    createdAt: timestamp("created_at")
+  createdAt: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
-
 
 export const users = createTable("user", {
   id: varchar("id", { length: 255 }).notNull().primaryKey(),
@@ -63,13 +64,13 @@ export const users = createTable("user", {
     fsp: 3,
   }).default(sql`CURRENT_TIMESTAMP(3)`),
   image: varchar("image", { length: 255 }),
-  phoneNumber : varchar("phoneNumber", { length: 50 }),
+  phoneNumber: varchar("phoneNumber", { length: 50 }),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   sessions: many(sessions),
-  startup:many(startups)
+  startup: many(startups),
 }));
 
 export const accounts = createTable(
@@ -96,7 +97,7 @@ export const accounts = createTable(
       columns: [account.provider, account.providerAccountId],
     }),
     userIdIdx: index("account_userId_idx").on(account.userId),
-  })
+  }),
 );
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -116,7 +117,7 @@ export const sessions = createTable(
   },
   (session) => ({
     userIdIdx: index("session_userId_idx").on(session.userId),
-  })
+  }),
 );
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -132,9 +133,22 @@ export const verificationTokens = createTable(
   },
   (vt) => ({
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
-  })
+  }),
 );
 
 export const startupsRelations = relations(startups, ({ one }) => ({
   user: one(users, { fields: [startups.founderId], references: [users.id] }),
 }));
+
+export const files = createTable("file", {
+  id: varchar("id", { length: 255 }).notNull().primaryKey(),
+  bucket: varchar("bucket", { length: 255 }).notNull(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  originalName: varchar("originalName", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  size: int("size").notNull(),
+});
+
+export type SelectUser = typeof users.$inferSelect;

@@ -14,6 +14,7 @@ import { updateProfile } from "@/server/actions";
 import { PencilIcon } from "lucide-react";
 import React, { useRef } from "react";
 import { useFormState, useFormStatus } from "react-dom";
+import type {  SelectUser } from "@/server/db/schema";
 const initialState = {
   message: "",
 };
@@ -26,7 +27,7 @@ function SubmitButton() {
   );
 }
 
-export default function UpdateProfileForm({ user }: { user: any }) {
+export default function UpdateProfileForm({ user }: { user: SelectUser  }) {
   const [state, formAction] = useFormState(updateProfile, initialState);
   const inputFileRef = useRef<HTMLInputElement>(null);
   const handleButtonClick = () => {
@@ -34,6 +35,7 @@ export default function UpdateProfileForm({ user }: { user: any }) {
       inputFileRef.current.click();
     }
   };
+  
 
   return (
     <form action={formAction}>
@@ -44,7 +46,7 @@ export default function UpdateProfileForm({ user }: { user: any }) {
               <h2 className="py-1">Personal information</h2>
               <div className="relative inline-block ">
                 <Av className="h-20 w-20  ">
-                  <AvatarImage alt="Avatar" src={user.image} />
+                  <AvatarImage alt="Avatar" src={user.image??""} />
                   <AvatarFallback>
                     <Avatar
                       name={user.name ?? "user"}

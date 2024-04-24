@@ -24,13 +24,13 @@ export default async function page() {
     <>
       <div>
         <Card x-chunk="dashboard-04-chunk-1">
-          <CardHeader >
+          <CardHeader>
             <CardTitle>Profile</CardTitle>
             <CardDescription>
               You can edit your account information here.
             </CardDescription>
           </CardHeader>
-          <UpdateProfileForm  user={userData} />
+          {userData && <UpdateProfileForm user={userData} />}
         </Card>
         <Card x-chunk="dashboard-04-chunk-2">
           <CardHeader>
