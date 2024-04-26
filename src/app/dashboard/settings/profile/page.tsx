@@ -11,6 +11,8 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { createPresignedUrlToDownload, getFileFromBucket } from "@/lib/minio";
+import { isValidURL } from "@/lib/utils";
 import { getServerAuthSession } from "@/server/auth";
 import { getUserData } from "@/server/queries";
 import React from "react";
@@ -19,7 +21,15 @@ export default async function page() {
   const session = await getServerAuthSession();
   const user = session?.user;
   if (!user) return null;
-  const userData = await getUserData();
+  let userData = await getUserData();
+  if (userData?.image && !isValidURL(userData.image)) {
+    const url = await createPresignedUrlToDownload({
+      bucketName: "startpad",
+      fileName: userData.image,
+    });
+    userData = { ...userData, image: url };
+  }
+  console.log("data", userData);
   return (
     <>
       <div>

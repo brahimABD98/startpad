@@ -24,7 +24,7 @@ export async function saveFileInBucket({
 }: {
   bucketName: string;
   fileName: string;
-  file: internal.Readable;
+  file: Buffer;
 }) {
   await createBucketIfNotExists(bucketName);
   const fileExists = await checkfileExistsInBucket({
@@ -83,4 +83,31 @@ export async function deleteFileFromBucket({
   }
 
   return true;
+}
+
+export async function createPresignedUrlToUpload({
+  bucketName,
+  fileName,
+  expiry = 60 * 60, // 1 hour
+}: {
+  bucketName: string;
+  fileName: string;
+  expiry?: number;
+}) {
+  // Create bucket if it doesn't exist
+  await createBucketIfNotExists(bucketName);
+
+  return await s3client.presignedPutObject(bucketName, fileName, expiry);
+}
+
+export async function createPresignedUrlToDownload({
+  bucketName,
+  fileName,
+  expiry = 60 * 60, // 1 hour
+}: {
+  bucketName: string;
+  fileName: string;
+  expiry?: number;
+}) {
+  return await s3client.presignedGetObject(bucketName, fileName, expiry);
 }
