@@ -1,17 +1,12 @@
 import UpdateProfileForm from "@/app/_components/UpdateProfileForm";
-import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { createPresignedUrlToDownload, getFileFromBucket } from "@/lib/minio";
+
+import { createPresignedUrlToDownload } from "@/lib/minio";
 import { isValidURL } from "@/lib/utils";
 import { getServerAuthSession } from "@/server/auth";
 import { getUserData } from "@/server/queries";
