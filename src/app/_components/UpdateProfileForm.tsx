@@ -22,7 +22,7 @@ const initialState = {
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <Button aria-disabled={pending} type="submit">
+    <Button aria-disabled={pending} disabled={pending} type="submit">
       Save
     </Button>
   );
@@ -31,9 +31,23 @@ function SubmitButton() {
 export default function UpdateProfileForm({ user }: { user: SelectUser }) {
   const [state, formAction] = useFormState(updateProfile, initialState);
   const inputFileRef = useRef<HTMLInputElement>(null);
+  const profilePreviewRef = useRef<HTMLImageElement>(null);
   const handleButtonClick = () => {
     if (inputFileRef.current) {
       inputFileRef.current.click();
+      // set the image to the preview
+      inputFileRef.current.addEventListener("change", (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            if (profilePreviewRef.current) {
+              profilePreviewRef.current.src = e.target?.result as string;
+            }
+          };
+          reader.readAsDataURL(file);
+        }
+      });
     }
   };
 
@@ -46,7 +60,11 @@ export default function UpdateProfileForm({ user }: { user: SelectUser }) {
               <h2 className="py-1">Personal information</h2>
               <div className="relative inline-block ">
                 <Av className="h-20 w-20  ">
-                  <AvatarImage alt="Avatar" src={user.image ?? ""} />
+                  <AvatarImage
+                    alt="Avatar"
+                    ref={profilePreviewRef}
+                    src={user.image ?? ""}
+                  />
                   <AvatarFallback>
                     <Avatar
                       name={user.name ?? "user"}

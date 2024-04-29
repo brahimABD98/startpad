@@ -14,7 +14,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { deleteProfile } from "@/server/actions";
-import DeleteProfileButton from "@/app/_components/DeleteProfileButton";
 export default function page() {
   return (
     <Card>

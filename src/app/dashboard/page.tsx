@@ -16,7 +16,6 @@ import {
   Users2,
 } from "lucide-react";
 
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -55,6 +54,7 @@ import {
 import { getServerAuthSession } from "@/server/auth";
 import { getUserStartups } from "@/server/queries";
 import Nav from "../_components/Nav";
+import AddStartup from "../_components/AddStartup";
 
 export default async function Page() {
   const session = await getServerAuthSession();
@@ -158,7 +158,8 @@ export default async function Page() {
                           <p className="text-sm text-muted-foreground">
                             You can start selling as soon as you add a startup.
                           </p>
-                          <Button className="mt-4">Add startup</Button>
+                          {/* <Button className="mt-4">Add startup</Button> */}
+                          <AddStartup />
                         </div>
                       </div>
                     </>
