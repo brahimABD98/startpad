@@ -100,3 +100,19 @@ export async function updateProfile(
     return { message: "Error updating profile" };
   }
 }
+export async function deleteProfile() {
+  const session = await getServerAuthSession();
+  if (!session) return { message: "Unauthorized" };
+  try {
+    await db
+      .delete(users)
+      .where(eq(users.id, session.user.id))
+      .catch((e) => {
+        console.log(e);
+      });
+    revalidatePath("/dashboard/settings/profile");
+    redirect("/");
+  } catch (error) {
+    return { message: "Error deleting profile" };
+  }
+}
