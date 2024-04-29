@@ -55,7 +55,11 @@ export default function page() {
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                 <DeleteProfileButton/>
+                  <form action={deleteProfile}>
+                    <Button variant="destructive" type="submit">
+                      delete profile
+                    </Button>
+                  </form>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

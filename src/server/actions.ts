@@ -94,11 +94,11 @@ export async function updateProfile(
       .catch((e) => {
         console.log(e);
       });
-    revalidatePath("/dashboard/settings/profile");
-    redirect("/dashboard/settings/profile");
   } catch (error) {
     return { message: "Error updating profile" };
   }
+  revalidatePath("/dashboard/settings/profile");
+  redirect("/dashboard/settings/profile");
 }
 export async function deleteProfile() {
   const session = await getServerAuthSession();
@@ -110,9 +110,9 @@ export async function deleteProfile() {
       .catch((e) => {
         console.log(e);
       });
-    revalidatePath("/dashboard/settings/profile");
-    redirect("/");
   } catch (error) {
     return { message: "Error deleting profile" };
   }
+  revalidatePath("/dashboard/settings/profile");
+  redirect("/");
 }
