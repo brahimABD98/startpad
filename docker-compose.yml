@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_SSL=off
+
+    volumes:
+      - minio-data:/data
+  db:
+    image: postgres:alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: startpad
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    
+volumes:
+  minio-data:
+  db-data:
