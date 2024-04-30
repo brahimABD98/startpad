@@ -1,14 +1,14 @@
 import { relations, sql } from "drizzle-orm";
 import {
-  bigint,
   index,
-  int,
-  mysqlTableCreator,
+  integer,
+  pgTableCreator,
   primaryKey,
+  serial,
   text,
   timestamp,
   varchar,
-} from "drizzle-orm/mysql-core";
+} from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
 /**
@@ -17,12 +17,12 @@ import { type AdapterAccount } from "next-auth/adapters";
  *
  * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
  */
-export const createTable = mysqlTableCreator((name) => `startpad_${name}`);
+export const createTable = pgTableCreator((name) => `startpad_${name}`);
 
 export const posts = createTable(
   "post",
   {
-    id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
+    id: serial("id").primaryKey(),
     name: varchar("name", { length: 256 }),
     createdById: varchar("createdById", { length: 255 })
       .notNull()
@@ -30,7 +30,7 @@ export const posts = createTable(
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
-    updatedAt: timestamp("updatedAt").onUpdateNow(),
+    updatedAt: timestamp("updatedAt"),
   },
   (example) => ({
     createdByIdIdx: index("createdById_idx").on(example.createdById),
@@ -39,20 +39,28 @@ export const posts = createTable(
 );
 
 export const startups = createTable("startup", {
-  id: bigint("id", { mode: "number" }).primaryKey().autoincrement(),
-  name: varchar("name", { length: 256 }),
-  logo_url: varchar("logo_url", { length: 255 }),
-  description: text("description"),
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  foundedAt: timestamp("foundedAt", { mode: "date" }).notNull(),
+  logo: text("logo").notNull(),
   founderId: varchar("founderId", { length: 255 })
     .notNull()
     .references(() => users.id),
-  createdById: varchar("createdById", { length: 255 })
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp("created_at")
+});
+export const startupsRelations = relations(startups, ({ one }) => ({
+  founder: one(users, { fields: [startups.founderId], references: [users.id] }),
+}));
+
+export const files = createTable("file", {
+  id: serial("id").primaryKey(),
+  fileName: varchar("fileName", { length: 255 }).notNull(),
+  bucket: varchar("bucket", { length: 255 }).notNull(),
+  originalName: varchar("originalName", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
+  size: integer("size").notNull(),
 });
 
 export const users = createTable("user", {
@@ -61,16 +69,14 @@ export const users = createTable("user", {
   email: varchar("email", { length: 255 }).notNull(),
   emailVerified: timestamp("emailVerified", {
     mode: "date",
-    fsp: 3,
-  }).default(sql`CURRENT_TIMESTAMP(3)`),
+  }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar("image", { length: 255 }),
-  phoneNumber: varchar("phoneNumber", { length: 50 }),
+  phoneNumber: varchar("phoneNumber", { length: 255 }),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
-  sessions: many(sessions),
-  startup: many(startups),
+  startups: many(startups),
 }));
 
 export const accounts = createTable(
@@ -86,7 +92,7 @@ export const accounts = createTable(
     providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
-    expires_at: int("expires_at"),
+    expires_at: integer("expires_at"),
     token_type: varchar("token_type", { length: 255 }),
     scope: varchar("scope", { length: 255 }),
     id_token: text("id_token"),
@@ -135,20 +141,5 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   }),
 );
-
-export const startupsRelations = relations(startups, ({ one }) => ({
-  user: one(users, { fields: [startups.founderId], references: [users.id] }),
-}));
-
-export const files = createTable("file", {
-  id: varchar("id", { length: 255 }).notNull().primaryKey(),
-  bucket: varchar("bucket", { length: 255 }).notNull(),
-  fileName: varchar("fileName", { length: 255 }).notNull(),
-  originalName: varchar("originalName", { length: 255 }).notNull(),
-  createdAt: timestamp("created_at")
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-  size: int("size").notNull(),
-});
 
 export type SelectUser = typeof users.$inferSelect;

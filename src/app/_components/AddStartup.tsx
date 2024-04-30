@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import React from "react";
 import { Input } from "@/components/ui/input";
+import { createStartup } from "@/server/actions";
 export default function AddStartup() {
   return (
     <Dialog>
@@ -20,21 +21,30 @@ export default function AddStartup() {
           <DialogTitle>Add a new startup</DialogTitle>
           <DialogDescription>you can add a new startup here.</DialogDescription>
         </DialogHeader>
-        <form>
-          <fieldset className="flex flex-col gap-2">
+        <form action={createStartup}>
+          <div className="flex flex-col gap-2">
             <Label htmlFor="name" className="mt-4">
               Name
             </Label>
-            <Input type="text" id="name" placeholder="pick a startup name" />
+            <Input
+              required
+              type="text"
+              name="name"
+              placeholder="pick a startup name"
+            />
             <Label htmlFor="description" className="mt-4">
               Description
             </Label>
             <Input
               type="text"
+              id="description"
+              required
               name="description"
               placeholder="write a breif description about your startup"
             />
-          </fieldset>
+            <Input type="date" required id="foundedAt" name="foundedAt" />
+            <Input type="file" required id="logo" name="logo" />
+          </div>
           <div className="pt-2">
             <Button type="submit">submit</Button>
           </div>

@@ -4,11 +4,11 @@ import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { getServerAuthSession } from "./auth";
 import { db } from "./db";
-import { files, users } from "./db/schema";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { saveFileInBucket } from "../lib/minio";
 import { File } from "buffer";
+import { files, startups, users } from "./db/schema";
 const fileSchema = z.instanceof(File).refine(
   (file) => {
     return (
@@ -74,7 +74,6 @@ export async function updateProfile(
       .insert(files)
       .values({
         originalName: new_file.fileName,
-        id: new_file.id,
         bucket: new_file.bucket,
         fileName: new_file.fileName,
         size: new_file.size,
@@ -115,4 +114,47 @@ export async function deleteProfile() {
   }
   revalidatePath("/dashboard/settings/profile");
   redirect("/");
+}
+
+export async function createStartup(formData: FormData) {
+  console.log(formData.entries());
+  const schema = z.object({
+    name: z.string(),
+    description: z.string(),
+    foundedAt: z
+      .string()
+      .refine((date) => new Date(date).toISOString() !== "Invalid Date")
+      .default(() => new Date().toISOString()),
+    logo: fileSchema.optional(),
+  });
+  const session = await getServerAuthSession();
+  if (!session) return { message: "Unauthorized" };
+  const parse = schema.safeParse({
+    name: formData.get("name"),
+    description: formData.get("description"),
+    foundedAt: formData.get("foundedAt"),
+    logo: formData.get("logo"),
+  });
+  if (!parse.success) {
+    console.error("error parsing:", parse.error.errors);
+    return { message: "Invalid form data" };
+  }
+  const data = parse.data;
+  const { name, description, foundedAt, logo } = data;
+  const new_startup = await db
+    .insert(startups)
+    .values({
+      name: name,
+      description: description,
+      foundedAt: new Date(foundedAt),
+      logo: logo?.name ?? "default.png",
+      founderId: session.user.id, 
+    })
+    .returning({ id: startups.id })
+    .catch((e) => {
+      console.error(e);
+      return [];
+    });
+  revalidatePath(`/dashboard/startups`);
+  redirect(`/dashboard/startup/${new_startup[0]?.id}`);
 }

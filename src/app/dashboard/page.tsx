@@ -1,20 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  File,
-  Home,
-  LineChart,
-  ListFilter,
-  MoreHorizontal,
-  Package,
-  Package2,
-  PanelLeft,
-  PlusCircle,
-  Search,
-  Settings,
-  ShoppingCart,
-  Users2,
-} from "lucide-react";
+import { Home, ListFilter, Package2, PlusCircle, Settings } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -29,22 +15,12 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
@@ -158,7 +134,6 @@ export default async function Page() {
                           <p className="text-sm text-muted-foreground">
                             You can start selling as soon as you add a startup.
                           </p>
-                          {/* <Button className="mt-4">Add startup</Button> */}
                           <AddStartup />
                         </div>
                       </div>
@@ -185,7 +160,10 @@ export default async function Page() {
                               {startup.description ?? "description exmaple "}
                             </CardDescription>
                           </div>
-                          <Link className="ml-auto" href="#">
+                          <Link
+                            className="ml-auto"
+                            href={`/dashboard/startup/${startup?.id}`}
+                          >
                             <Button size="sm">Select</Button>
                           </Link>
                         </CardHeader>

@@ -1,10 +1,8 @@
 import "server-only";
 import { db } from "./db";
 import { getServerAuthSession } from "./auth";
-
-import { z } from "zod";
-import { users } from "./db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import { startups } from "./db/schema";
 export async function getUserStartups() {
   const session = await getServerAuthSession();
   const userId = session?.user.id;
@@ -28,4 +26,12 @@ export async function getUserData() {
   return userdata;
 }
 
-
+export async function getStartupInfo(id: string) {
+  const session = await getServerAuthSession();
+  const userId = session?.user.id;
+  if (!userId) throw Error("Unauthorized");
+  const startup = db.query.startups.findFirst({
+    where: and(eq(startups.id, Number(id)), eq(startups.founderId, userId)),
+  });
+  return startup;
+}
