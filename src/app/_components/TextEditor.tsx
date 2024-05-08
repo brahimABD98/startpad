@@ -1,57 +1,34 @@
 "use client";
-import type { InputHTMLAttributes } from "react";
-import { forwardRef, useRef, useLayoutEffect ,useEffect} from "react";
-import Quill from "quill";
-const TextEditor = forwardRef<
-  HTMLInputElement,
-  InputHTMLAttributes<HTMLInputElement>
->(({ readOnly, defaultValue, onChange, onSelect }, ref) => {
-  const containerRef = useRef(null);
-  const defaultValueRef = useRef(defaultValue);
-  const onTextChangeRef = useRef(onChange);
-  const onSelectionChangeRef = useRef(onSelect);
-
-  useLayoutEffect(() => {
-    onTextChangeRef.current = onChange;
-    onSelectionChangeRef.current = onSelect;
-  });
+import React, { useEffect, useState } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+export default function TextEditor() {
+  const [value, setValue] = useState("");
+  useEffect(() => {
+    const prevState = localStorage.getItem("textEditorData");
+    if (prevState) setValue(prevState);
+  }, []); // Run only on mount to prevent infinite loop
 
   useEffect(() => {
-    ref.current?.enable(!readOnly);
-  }, [ref, readOnly]);
+    localStorage.setItem("textEditorData", value);
+  }, [value]); // Save value to localStorage whenever it changes
 
-  useEffect(() => {
-    const container = containerRef.current;
-    const editorContainer = container.appendChild(
-      container.ownerDocument.createElement("div"),
-    );
-    const quill = new Quill(editorContainer, {
-      theme: "snow",
-    });
+  const toolbar_option = [
+    [{ color: [] }],
+    ["bold", "italic", "underline", "strike"],
+    [{ size: ["small", false, "large", "huge"] }], // custom dropdown
+    [{ header: [1, 2, 3, 4, 5, 6, false] }],
+    ["link", "image", "video", "formula"],
+  ];
 
-    ref.current = quill;
-
-    if (defaultValueRef.current) {
-      quill.setContents(defaultValueRef.current);
-    }
-
-    quill.on(Quill.events.TEXT_CHANGE, (...args) => {
-      onTextChangeRef.current?.(...args);
-    });
-
-    quill.on(Quill.events.SELECTION_CHANGE, (...args) => {
-      onSelectionChangeRef.current?.(...args);
-    });
-
-    return () => {
-      ref.current = null;
-      container.innerHTML = "";
-    };
-  }, [ref]);
-
-  return <div ref={containerRef}></div>;
-});
-
-TextEditor.displayName = "Editor";
-
-export default TextEditor;
+  return (
+    <>
+      <ReactQuill
+        modules={{ toolbar: toolbar_option }}
+        theme="snow"
+        onChange={setValue}
+        value={value}
+      />
+    </>
+  );
+}
