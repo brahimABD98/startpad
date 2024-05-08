@@ -30,8 +30,7 @@ export async function getStartupInfo(id: string) {
   const session = await getServerAuthSession();
   const userId = session?.user.id;
   if (!userId) throw Error("Unauthorized");
-  const startup = db.query.startups.findFirst({
+  return db.query.startups.findFirst({
     where: and(eq(startups.id, Number(id)), eq(startups.founderId, userId)),
   });
-  return startup;
 }

@@ -12,7 +12,6 @@ export default function SettingsNavBar() {
     { href: "#", text: "Support", id: 4 },
     { href: "/dashboard/settings/advanced", text: "Advanced", id: 5 },
   ];
-  console.warn("pathname", pathname);
   return (
     <nav
       className="grid gap-4 text-sm text-muted-foreground"
