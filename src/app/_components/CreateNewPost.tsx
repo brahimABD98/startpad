@@ -32,7 +32,7 @@ export default function CreateNewPost() {
               <AvatarFallback>JP</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <TextEditor />
+              <TextEditor  />
               <div className="mt-2 flex items-center justify-end space-x-2">
                 <Button size="sm" type="submit">
                   Post

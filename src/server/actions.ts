@@ -55,6 +55,7 @@ export async function updateProfile(
 
   const new_file = {
     id: file_id,
+    originalName: data.image?.name ?? "default.png",
     fileName: `${file_id}.${data.image?.type.split("/")[1]}` ?? "default.png",
     size: data.image?.size ?? 0,
     bucket: "startpad",
@@ -73,7 +74,7 @@ export async function updateProfile(
     await db
       .insert(files)
       .values({
-        originalName: new_file.fileName,
+        originalName: new_file.originalName,
         bucket: new_file.bucket,
         fileName: new_file.fileName,
         size: new_file.size,
@@ -148,7 +149,7 @@ export async function createStartup(formData: FormData) {
       description: description,
       foundedAt: new Date(foundedAt),
       logo: logo?.name ?? "default.png",
-      founderId: session.user.id, 
+      founderId: session.user.id,
     })
     .returning({ id: startups.id })
     .catch((e) => {
