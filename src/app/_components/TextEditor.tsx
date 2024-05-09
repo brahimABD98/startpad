@@ -1,9 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import ReactQuill from "react-quill";
+import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import ImageUploder from "quill-image-uploader";
 export default function TextEditor() {
   const [value, setValue] = useState("");
+  Quill.register('modules/imageUploader',ImageUploder)
   useEffect(() => {
     const prevState = localStorage.getItem("textEditorData");
     if (prevState) setValue(prevState);

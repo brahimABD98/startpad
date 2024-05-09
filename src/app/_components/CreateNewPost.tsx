@@ -34,9 +34,6 @@ export default function CreateNewPost() {
             <div className="flex-1">
               <TextEditor />
               <div className="mt-2 flex items-center justify-end space-x-2">
-                <Button size="sm" variant="outline">
-                  Upload
-                </Button>
                 <Button size="sm" type="submit">
                   Post
                 </Button>
