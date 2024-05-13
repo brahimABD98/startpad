@@ -374,7 +374,11 @@ export function TextEditor() {
     <TooltipProvider>
       <DndProvider backend={HTML5Backend}>
         <CommentsProvider users={{}} myUserId="1">
-          <Plate plugins={plugins} initialValue={initialValue}>
+          <Plate
+            onChange={(v) => console.warn(v)}
+            plugins={plugins}
+            initialValue={initialValue}
+          >
             <FixedToolbar>
               <FixedToolbarButtons />
             </FixedToolbar>
