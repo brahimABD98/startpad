@@ -10,23 +10,6 @@ import Image from "next/image";
 import TextEditor from "./TextEditor";
 
 export default function CreateNewPost() {
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const handleImageInsertion = (imageUrl: string) => {
-    setImageUrls((prevUrls) => [...prevUrls, imageUrl]);
-  };
-
-  // useEffect(() => {
-  //   const storedImageUrls = localStorage.getItem("imageUrls");
-  //   if (storedImageUrls) {
-  //     setImageUrls(JSON.parse(storedImageUrls) as string[]);
-  //   }
-  // }, []);
-
-  // // Save imageUrls to localStorage whenever it changes
-  // useEffect(() => {
-  //   localStorage.setItem("imageUrls", JSON.stringify(imageUrls));
-  // }, [imageUrls]);
-  // console.warn("images", imageUrls);
 
   return (
     <Card>
@@ -50,19 +33,12 @@ export default function CreateNewPost() {
               <AvatarFallback>JP</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <TextEditor onImageInsert={handleImageInsertion} />
+            
               <div className="mt-2 flex items-center justify-end space-x-2">
                 <Button size="sm" type="submit">
                   Post
                 </Button>
               </div>
-              images
-              {imageUrls.map((url) => (
-                <>
-                  images:
-                  <p key={url}>{url}</p>
-                </>
-              ))}
             </div>
           </div>
         </CardContent>
