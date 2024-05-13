@@ -3,13 +3,31 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 import TextEditor from "./TextEditor";
 
 export default function CreateNewPost() {
-  // Use a ref to access the quill instance directly
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const handleImageInsertion = (imageUrl: string) => {
+    setImageUrls((prevUrls) => [...prevUrls, imageUrl]);
+  };
+
+  // useEffect(() => {
+  //   const storedImageUrls = localStorage.getItem("imageUrls");
+  //   if (storedImageUrls) {
+  //     setImageUrls(JSON.parse(storedImageUrls) as string[]);
+  //   }
+  // }, []);
+
+  // // Save imageUrls to localStorage whenever it changes
+  // useEffect(() => {
+  //   localStorage.setItem("imageUrls", JSON.stringify(imageUrls));
+  // }, [imageUrls]);
+  // console.warn("images", imageUrls);
+
   return (
     <Card>
       <form action="">
@@ -32,12 +50,19 @@ export default function CreateNewPost() {
               <AvatarFallback>JP</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <TextEditor  />
+              <TextEditor onImageInsert={handleImageInsertion} />
               <div className="mt-2 flex items-center justify-end space-x-2">
                 <Button size="sm" type="submit">
                   Post
                 </Button>
               </div>
+              images
+              {imageUrls.map((url) => (
+                <>
+                  images:
+                  <p key={url}>{url}</p>
+                </>
+              ))}
             </div>
           </div>
         </CardContent>

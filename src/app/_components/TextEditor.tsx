@@ -8,7 +8,10 @@ import React, {
 } from "react";
 import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
-export default function TextEditor() {
+interface TextEditorProps {
+  onImageInsert: (imageUrl: string) => void;
+}
+const TextEditor: React.FC<TextEditorProps> = ({ onImageInsert }) => {
   const [value, setValue] = useState("");
   useEffect(() => {
     const prevState = localStorage.getItem("textEditorData");
@@ -33,7 +36,7 @@ export default function TextEditor() {
         return;
       }
       const reader = new FileReader();
-      
+
       // Read the selected file as a data URL
       reader.onload = () => {
         const imageUrl = reader.result;
@@ -80,4 +83,6 @@ export default function TextEditor() {
       />
     </>
   );
-}
+};
+
+export default TextEditor;
