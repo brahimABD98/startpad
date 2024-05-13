@@ -7,10 +7,9 @@ import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import TextEditor from "./TextEditor";
+import { TextEditor } from "./TextEditor";
 
 export default function CreateNewPost() {
-
   return (
     <Card>
       <form action="">
@@ -33,7 +32,7 @@ export default function CreateNewPost() {
               <AvatarFallback>JP</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-            
+              <TextEditor />
               <div className="mt-2 flex items-center justify-end space-x-2">
                 <Button size="sm" type="submit">
                   Post
