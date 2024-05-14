@@ -7,7 +7,7 @@ import React, { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { TextEditor } from "./TextEditor";
+import TextEditor from "./TextEditor";
 
 export default function CreateNewPost() {
   return (

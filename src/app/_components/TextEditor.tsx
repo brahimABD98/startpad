@@ -8,10 +8,8 @@ import React, {
 } from "react";
 import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
-interface TextEditorProps {
-  onImageInsert: (imageUrl: string) => void;
-}
-const TextEditor: React.FC<TextEditorProps> = ({ onImageInsert }) => {
+
+const TextEditor = () => {
   const [value, setValue] = useState("");
   useEffect(() => {
     const prevState = localStorage.getItem("textEditorData");
@@ -20,6 +18,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ onImageInsert }) => {
   const quillRef: React.LegacyRef<ReactQuill> = useRef(null);
 
   const fileHandler = useCallback(() => {
+    // TODO: open a custom file picker
     const input = document.createElement("input");
     input.setAttribute("type", "file");
     input.setAttribute("accept", "image/*");
@@ -35,6 +34,8 @@ const TextEditor: React.FC<TextEditorProps> = ({ onImageInsert }) => {
         console.error("error while getting file");
         return;
       }
+      ///TODO: upload file to server
+
       const reader = new FileReader();
 
       // Read the selected file as a data URL
@@ -43,10 +44,10 @@ const TextEditor: React.FC<TextEditorProps> = ({ onImageInsert }) => {
         if (!quillRef?.current) return;
 
         const quillEditor = quillRef.current.getEditor();
-        console.warn("file", file, "url", imageUrl);
 
         // Get the current selection range and insert the image at that index
         const range = quillEditor.getSelection(true);
+        // get image from server and insert it to the editor
         quillEditor.insertEmbed(range.index, "image", imageUrl, "user");
       };
       reader.readAsDataURL(file);
