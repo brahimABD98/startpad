@@ -26,7 +26,7 @@ const TextEditor: React.FC<TextEditorProps> = ({ onImageInsert }) => {
     input.click();
     input.onchange = () => {
       if (!input.files) {
-        console.error("error occured wile getting input", input.files);
+        console.error("error occured wile getting input");
         return;
       }
 
