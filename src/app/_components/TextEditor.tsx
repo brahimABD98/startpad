@@ -8,8 +8,11 @@ import React, {
 } from "react";
 import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
+type TextEditorProps= {
+  setContent: React.Dispatch<React.SetStateAction<string>>
+}
 
-const TextEditor = () => {
+const TextEditor = ({setContent}:TextEditorProps) => {
   const [value, setValue] = useState("");
   useEffect(() => {
     const prevState = localStorage.getItem("textEditorData");
@@ -17,45 +20,50 @@ const TextEditor = () => {
   }, []); // Run only on mount to prevent infinite loop
   const quillRef: React.LegacyRef<ReactQuill> = useRef(null);
 
-  const fileHandler = useCallback(() => {
-    // TODO: open a custom file picker
-    const input = document.createElement("input");
-    input.setAttribute("type", "file");
-    input.setAttribute("accept", "image/*");
-    input.click();
-    input.onchange = () => {
-      if (!input.files) {
-        console.error("error occured wile getting input");
+  const openCustomFilePicker = useCallback(() => {
+    // Simulate a file input click event
+    const fileInput = document.createElement("input");
+    fileInput.setAttribute("type", "file");
+    fileInput.setAttribute("accept", "image/*");
+    fileInput.style.display = "none"; // Hide the input element
+    document.body.appendChild(fileInput);
+    fileInput.click();
+
+    fileInput.onchange = async () => {
+      if (!fileInput.files) {
+        console.error("Error occurred while getting input");
         return;
       }
 
-      const file = input.files[0];
+      const file = fileInput.files[0];
       if (!file) {
-        console.error("error while getting file");
+        console.error("Error while getting file");
         return;
       }
-      ///TODO: upload file to server
 
-      const reader = new FileReader();
+      // TODO: Upload file to server (implementation depends on your backend)
+      const imageUrl = uploadFileToServer(file); // Replace with your upload function
 
-      // Read the selected file as a data URL
-      reader.onload = () => {
-        const imageUrl = reader.result;
-        if (!quillRef?.current) return;
+      // if (!imageUrl) {
+      //   console.error("Error uploading file");
+      //   return;
+      // }
 
-        const quillEditor = quillRef.current.getEditor();
+      const quillEditor = quillRef.current?.getEditor();
+      if (!quillEditor) return;
 
-        // Get the current selection range and insert the image at that index
-        const range = quillEditor.getSelection(true);
-        // get image from server and insert it to the editor
-        quillEditor.insertEmbed(range.index, "image", imageUrl, "user");
-      };
-      reader.readAsDataURL(file);
+      const range = quillEditor.getSelection(true);
+      quillEditor.insertEmbed(range.index, "image", imageUrl, "user");
+
+      document.body.removeChild(fileInput); // Remove the temporary input element
     };
   }, []);
+
   useEffect(() => {
+    setContent(value)
     localStorage.setItem("textEditorData", value);
   }, [value]); // Save value to localStorage whenever it changes
+
   const modules = useMemo(
     () => ({
       toolbar: {
@@ -67,12 +75,13 @@ const TextEditor = () => {
           ["link", "image", "video", "formula"],
         ],
         handlers: {
-          image: fileHandler,
+          image: openCustomFilePicker,
         },
       },
     }),
-    [fileHandler],
+    [openCustomFilePicker],
   );
+
   return (
     <>
       <ReactQuill
@@ -87,3 +96,10 @@ const TextEditor = () => {
 };
 
 export default TextEditor;
+
+// This function needs to be implemented based on your backend
+function uploadFileToServer(file: File) {
+  // Implement your upload logic here (e.g., using fetch API or a library like Axios)
+  // This function should return the uploaded image URL on success
+  throw new Error("uploadFileToServer not implemented");
+}
