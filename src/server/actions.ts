@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { saveFileInBucket } from "../lib/minio";
 import { File } from "buffer";
 import { files, startups, users } from "./db/schema";
+import { CreateNewPostSchema } from "@/lib/formSchema";
 const fileSchema = z.instanceof(File).refine(
   (file) => {
     return (
@@ -115,6 +116,12 @@ export async function deleteProfile() {
   }
   revalidatePath("/dashboard/settings/profile");
   redirect("/");
+}
+
+export async function createPost(
+  formData: z.infer<typeof CreateNewPostSchema>,
+) {
+  console.warn("data", { ...formData });
 }
 
 export async function createStartup(formData: FormData) {
