@@ -12,17 +12,19 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Heart, Inbox, InboxIcon, Mountain, Share } from "lucide-react";
-import { getServerAuthSession } from "@/server/auth";
+import { Heart, InboxIcon, Mountain, Share } from "lucide-react";
 import CreateNewPost from "@/app/_components/CreateNewPost";
-import { getStartupInfo } from "@/server/queries";
+import { getStartupInfo, getUserData, getUserStartups } from "@/server/queries";
+import UserAvatar from "@/app/_components/UserAvatar";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const startup_info = await getStartupInfo(params.id);
-  const session = await getServerAuthSession();
-  const is_owner = startup_info?.founderId === session?.user.id;
+  const user = await getUserData();
+  const user_startups = await getUserStartups();
+  console.log(user);
+  if (!user) return null;
+  const is_owner = startup_info?.founderId === user?.id;
   return (
     <div className="flex min-h-screen flex-col">
       <header className="relative bg-gray-100 px-6 py-4 text-gray-900 dark:bg-gray-800 dark:text-gray-100 md:px-8 md:py-6">
@@ -56,7 +58,9 @@ export default async function Page({ params }: { params: { id: string } }) {
               <TabsTrigger value="trending">Trending</TabsTrigger>
             </TabsList>
             <TabsContent className="mt-8" value="all-posts">
-              {is_owner && <CreateNewPost />}
+              {is_owner && (
+                <CreateNewPost user={user} user_startups={user_startups} />
+              )}
 
               <Card className="mt-8">
                 <CardHeader>

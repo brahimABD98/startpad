@@ -9,4 +9,5 @@ export const CreateNewPostSchema = z.object({
     },
     { message: "Post content cannot be empty" },
   ),
+  author_id: z.coerce.string(),
 });

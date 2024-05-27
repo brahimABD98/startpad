@@ -8,59 +8,67 @@ import React, {
 } from "react";
 import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
-type TextEditorProps= {
-  setContent: React.Dispatch<React.SetStateAction<string>>
-}
+type TextEditorProps = {
+  setContent: React.Dispatch<React.SetStateAction<string>>;
+};
 
-const TextEditor = ({setContent}:TextEditorProps) => {
+const TextEditor = ({ setContent }: TextEditorProps) => {
+  const [isMounted, setIsMounted] = useState(false);
+
   const [value, setValue] = useState("");
   useEffect(() => {
     const prevState = localStorage.getItem("textEditorData");
     if (prevState) setValue(prevState);
+    setIsMounted(true);
   }, []); // Run only on mount to prevent infinite loop
   const quillRef: React.LegacyRef<ReactQuill> = useRef(null);
 
   const openCustomFilePicker = useCallback(() => {
     // Simulate a file input click event
-    const fileInput = document.createElement("input");
-    fileInput.setAttribute("type", "file");
-    fileInput.setAttribute("accept", "image/*");
-    fileInput.style.display = "none"; // Hide the input element
-    document.body.appendChild(fileInput);
-    fileInput.click();
 
-    fileInput.onchange = async () => {
-      if (!fileInput.files) {
-        console.error("Error occurred while getting input");
-        return;
-      }
+    if (isMounted) {
+      const fileInput = document.createElement("input");
+      fileInput.setAttribute("type", "file");
+      fileInput.setAttribute("accept", "image/*");
+      fileInput.style.display = "none"; // Hide the input element
+      document.body.appendChild(fileInput);
+      fileInput.click();
 
-      const file = fileInput.files[0];
-      if (!file) {
-        console.error("Error while getting file");
-        return;
-      }
+      fileInput.onchange = async () => {
+        if (!fileInput.files) {
+          console.error("Error occurred while getting input");
+          return;
+        }
 
-      // TODO: Upload file to server (implementation depends on your backend)
-      const imageUrl = uploadFileToServer(file); // Replace with your upload function
+        const file = fileInput.files[0];
+        if (!file) {
+          console.error("Error while getting file");
+          return;
+        }
 
-      // if (!imageUrl) {
-      //   console.error("Error uploading file");
-      //   return;
-      // }
+        // TODO: Upload file to server (implementation depends on your backend)
+        // TODO:content moderation https://github.com/afoley587/hosting-yolo-fastapi
+        const imageUrl = uploadFileToServer(file); // Replace with your upload function
 
-      const quillEditor = quillRef.current?.getEditor();
-      if (!quillEditor) return;
+        // if (!imageUrl) {
+        //   console.error("Error uploading file");
+        //   return;
+        // }
 
-      const range = quillEditor.getSelection(true);
-      quillEditor.insertEmbed(range.index, "image", imageUrl, "user");
+        const quillEditor = quillRef.current?.getEditor();
+        if (!quillEditor) return;
 
-      document.body.removeChild(fileInput); // Remove the temporary input element
-    };
+        const range = quillEditor.getSelection(true);
+        //FIXME : fix image insert inside texteditor
+        quillEditor.insertEmbed(range.index, "image", imageUrl, "user");
+
+        document.body.removeChild(fileInput); // Remove the temporary input element
+      };
+    }
   }, []);
 
   useEffect(() => {
-    setContent(value)
+    setContent(value);
     localStorage.setItem("textEditorData", value);
   }, [value]); // Save value to localStorage whenever it changes
 

@@ -1,3 +1,4 @@
+import { createDecipheriv } from "crypto";
 import { relations, sql } from "drizzle-orm";
 import {
   index,
@@ -24,16 +25,18 @@ export const posts = createTable(
   {
     id: serial("id").primaryKey(),
     name: varchar("name", { length: 256 }),
-    createdById: varchar("createdById", { length: 255 })
+    createdByUser: varchar("createdById", { length: 255 })
       .notNull()
       .references(() => users.id),
+    createdByStartup: integer("createdByStartup").references(() => startups.id),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp("updatedAt"),
   },
   (example) => ({
-    createdByIdIdx: index("createdById_idx").on(example.createdById),
+    createdByIdIdx: index("createdById_idx").on(example.createdByUser),
+    createdBySidIdx: index("createdByStartup_idx").on(example.createdByStartup),
     nameIndex: index("name_idx").on(example.name),
   }),
 );
@@ -143,3 +146,4 @@ export const verificationTokens = createTable(
 );
 
 export type SelectUser = typeof users.$inferSelect;
+export type SelectStartups = typeof startups.$inferSelect;

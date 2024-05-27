@@ -3,6 +3,7 @@ import { db } from "./db";
 import { getServerAuthSession } from "./auth";
 import { eq, and } from "drizzle-orm";
 import { startups } from "./db/schema";
+
 export async function getUserStartups() {
   const session = await getServerAuthSession();
   const userId = session?.user.id;
@@ -25,6 +26,8 @@ export async function getUserData() {
   });
   return userdata;
 }
+
+
 
 export async function getStartupInfo(id: string) {
   const session = await getServerAuthSession();

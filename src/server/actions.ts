@@ -121,7 +121,9 @@ export async function deleteProfile() {
 export async function createPost(
   formData: z.infer<typeof CreateNewPostSchema>,
 ) {
-  console.warn("data", { ...formData });
+  const parse = CreateNewPostSchema.safeParse(formData);
+  console.log(parse.data)
+
 }
 
 export async function createStartup(formData: FormData) {
