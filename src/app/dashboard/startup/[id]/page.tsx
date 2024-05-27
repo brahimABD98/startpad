@@ -15,14 +15,11 @@ import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Heart, InboxIcon, Mountain, Share } from "lucide-react";
 import CreateNewPost from "@/app/_components/CreateNewPost";
-import { getStartupInfo, getUserData, getUserStartups } from "@/server/queries";
-import UserAvatar from "@/app/_components/UserAvatar";
+import { getStartupInfo, getUserWithStartups } from "@/server/queries";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const startup_info = await getStartupInfo(params.id);
-  const user = await getUserData();
-  const user_startups = await getUserStartups();
-  console.log(user);
+  const user = await getUserWithStartups();
   if (!user) return null;
   const is_owner = startup_info?.founderId === user?.id;
   return (
@@ -58,9 +55,7 @@ export default async function Page({ params }: { params: { id: string } }) {
               <TabsTrigger value="trending">Trending</TabsTrigger>
             </TabsList>
             <TabsContent className="mt-8" value="all-posts">
-              {is_owner && (
-                <CreateNewPost user={user} user_startups={user_startups} />
-              )}
+              {is_owner && <CreateNewPost user={user} />}
 
               <Card className="mt-8">
                 <CardHeader>

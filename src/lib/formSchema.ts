@@ -1,5 +1,7 @@
 import { z } from "zod";
+
 export const CreateNewPostSchema = z.object({
+  title: z.string().min(5).max(255),
   markpinned: z.boolean().optional().default(false),
   postContent: z.string().refine(
     (content) => {
@@ -9,5 +11,5 @@ export const CreateNewPostSchema = z.object({
     },
     { message: "Post content cannot be empty" },
   ),
-  author_id: z.coerce.string(),
+  author_id: z.string(),
 });

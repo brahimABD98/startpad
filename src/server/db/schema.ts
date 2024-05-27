@@ -1,6 +1,6 @@
-import { createDecipheriv } from "crypto";
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   pgTableCreator,
@@ -24,20 +24,22 @@ export const posts = createTable(
   "post",
   {
     id: serial("id").primaryKey(),
-    name: varchar("name", { length: 256 }),
-    createdByUser: varchar("createdById", { length: 255 })
-      .notNull()
-      .references(() => users.id),
+    title: varchar("title", { length: 256 }),
+    createdByUser: varchar("createdById", { length: 255 }).references(
+      () => users.id,
+    ),
     createdByStartup: integer("createdByStartup").references(() => startups.id),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp("updatedAt"),
+    is_pinned: boolean("is_pinned").default(false),
+    content: text("content").notNull(),
   },
   (example) => ({
     createdByIdIdx: index("createdById_idx").on(example.createdByUser),
     createdBySidIdx: index("createdByStartup_idx").on(example.createdByStartup),
-    nameIndex: index("name_idx").on(example.name),
+    nameIndex: index("name_idx").on(example.title),
   }),
 );
 
@@ -147,3 +149,7 @@ export const verificationTokens = createTable(
 
 export type SelectUser = typeof users.$inferSelect;
 export type SelectStartups = typeof startups.$inferSelect;
+
+export type UserWithStartups = SelectUser & {
+  startups: SelectStartups[];
+};

@@ -27,7 +27,18 @@ export async function getUserData() {
   return userdata;
 }
 
-
+export async function getUserWithStartups() {
+  const session = await getServerAuthSession();
+  const userId = session?.user.id;
+  if (!userId) throw Error("Unauthorized");
+  return db.query.users.findFirst({
+    where: (model, { eq }) => eq(model.id, userId),
+    with: {
+      startups: true,
+    },
+  });
+  5;
+}
 
 export async function getStartupInfo(id: string) {
   const session = await getServerAuthSession();
