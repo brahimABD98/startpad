@@ -53,9 +53,6 @@ export const startups = createTable("startup", {
     .notNull()
     .references(() => users.id),
 });
-export const startupsRelations = relations(startups, ({ one }) => ({
-  founder: one(users, { fields: [startups.founderId], references: [users.id] }),
-}));
 
 export const files = createTable("file", {
   id: serial("id").primaryKey(),
@@ -78,11 +75,6 @@ export const users = createTable("user", {
   image: varchar("image", { length: 255 }),
   phoneNumber: varchar("phoneNumber", { length: 255 }),
 });
-
-export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
-  startups: many(startups),
-}));
 
 export const accounts = createTable(
   "account",
@@ -111,10 +103,6 @@ export const accounts = createTable(
   }),
 );
 
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, { fields: [accounts.userId], references: [users.id] }),
-}));
-
 export const sessions = createTable(
   "session",
   {
@@ -130,10 +118,6 @@ export const sessions = createTable(
     userIdIdx: index("session_userId_idx").on(session.userId),
   }),
 );
-
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, { fields: [sessions.userId], references: [users.id] }),
-}));
 
 export const verificationTokens = createTable(
   "verificationToken",
@@ -153,3 +137,32 @@ export type SelectStartups = typeof startups.$inferSelect;
 export type UserWithStartups = SelectUser & {
   startups: SelectStartups[];
 };
+
+export const postsRelations = relations(posts, ({ one }) => ({
+  createdByUser: one(users, {
+    fields: [posts.createdByUser],
+    references: [users.id],
+  }),
+  createdByStartup: one(startups, {
+    fields: [posts.createdByStartup],
+    references: [startups.id],
+  }),
+}));
+
+export const startupsRelations = relations(startups, ({ one }) => ({
+  founder: one(users, { fields: [startups.founderId], references: [users.id] }),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, { fields: [sessions.userId], references: [users.id] }),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  startups: many(startups),
+  posts: many(posts),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+}));

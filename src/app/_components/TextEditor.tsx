@@ -9,11 +9,10 @@ import React, {
 import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
 type TextEditorProps = {
-  content: string;
   setContent: React.Dispatch<React.SetStateAction<string>>;
 };
 
-const TextEditor = ({ setContent, content }: TextEditorProps) => {
+const TextEditor = ({ setContent }: TextEditorProps) => {
   const [isMounted, setIsMounted] = useState(false);
 
   const [value, setValue] = useState("");
@@ -21,7 +20,7 @@ const TextEditor = ({ setContent, content }: TextEditorProps) => {
     const prevState = localStorage.getItem("textEditorData");
     setValue(prevState ?? "");
     setIsMounted(true);
-  }, [content]); // Run only on mount to prevent infinite loop
+  }, []); // Run only on mount to prevent infinite loop
   const quillRef: React.LegacyRef<ReactQuill> = useRef(null);
 
   const openCustomFilePicker = useCallback(() => {

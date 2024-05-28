@@ -1,6 +1,5 @@
 import * as Minio from "minio";
 import { env } from "@/env";
-import type internal from "stream";
 
 export const s3client = new Minio.Client({
   endPoint: env.S3_ENDPOINT,

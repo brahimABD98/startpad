@@ -16,9 +16,11 @@ import { Button } from "@/components/ui/button";
 import { Heart, InboxIcon, Mountain, Share } from "lucide-react";
 import CreateNewPost from "@/app/_components/CreateNewPost";
 import { getStartupInfo, getUserWithStartups } from "@/server/queries";
+import { DisplayAllPosts } from "@/app/_components/DisplayAllPosts";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const startup_info = await getStartupInfo(params.id);
+  if (!startup_info) return null;
   const user = await getUserWithStartups();
   if (!user) return null;
   const is_owner = startup_info?.founderId === user?.id;
@@ -63,100 +65,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="space-y-4">
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center space-x-4">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage
-                              alt="@shadcn"
-                              src="/placeholder-avatar.jpg"
-                            />
-                            <AvatarFallback>JP</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h4 className="font-semibold">Jared Palmer</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              @shadcn
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          May 2, 2024
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        <p>
-                          Lorem ipsum dolor sit amet consectetur adipisicing
-                          elit. Ea aspernatur quae voluptatem porro quisquam
-                          fugit velit earum nobis voluptatibus voluptate maxime
-                          ratione ducimus modi, quasi qui ipsum eveniet! Dicta,
-                          est.
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <div className="flex items-center space-x-4">
-                          <Button size="icon" variant="ghost">
-                            <Heart className="h-5 w-5" />
-                            <span className="sr-only">Like</span>
-                          </Button>
-                          <Button size="icon" variant="ghost">
-                            <InboxIcon className="h-5 w-5" />
-                            <span className="sr-only">Comment</span>
-                          </Button>
-                          <Button size="icon" variant="ghost">
-                            <Share className="h-5 w-5" />
-                            <span className="sr-only">Share</span>
-                          </Button>
-                        </div>
-                      </CardFooter>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center space-x-4">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage
-                              alt="@shadcn"
-                              src="/placeholder-avatar.jpg"
-                            />
-                            <AvatarFallback>JP</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h4 className="font-semibold">Jared Palmer</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              @shadcn
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          April 28, 2024
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        <p>
-                          Lorem ipsum dolor sit amet consectetur adipisicing
-                          elit. Cupiditate, porro quis enim assumenda reiciendis
-                          aperiam? Reiciendis saepe in accusamus amet at commodi
-                          voluptate tenetur voluptatibus! Aspernatur
-                          consequuntur sit libero fugiat.
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <div className="flex items-center space-x-4">
-                          <Button size="icon" variant="ghost">
-                            <Heart className="h-5 w-5" />
-                            <span className="sr-only">Like</span>
-                          </Button>
-                          <Button size="icon" variant="ghost">
-                            <InboxIcon className="h-5 w-5" />
-                            <span className="sr-only">Comment</span>
-                          </Button>
-                          <Button size="icon" variant="ghost">
-                            <Share className="h-5 w-5" />
-                            <span className="sr-only">Share</span>
-                          </Button>
-                        </div>
-                      </CardFooter>
-                    </Card>
+                    <DisplayAllPosts startup={startup_info} />
                   </div>
                 </CardContent>
               </Card>

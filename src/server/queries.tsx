@@ -1,9 +1,11 @@
 import "server-only";
 import { db } from "./db";
+import { isValidURL } from "@/lib/utils";
 import { getServerAuthSession } from "./auth";
-import { eq, and } from "drizzle-orm";
-import { startups } from "./db/schema";
-
+import { eq, and, or } from "drizzle-orm";
+import { startups, posts } from "./db/schema";
+import type { SelectStartups } from "./db/schema";
+import { createPresignedUrlToDownload } from "@/lib/minio";
 export async function getUserStartups() {
   const session = await getServerAuthSession();
   const userId = session?.user.id;
@@ -38,6 +40,29 @@ export async function getUserWithStartups() {
     },
   });
   5;
+}
+export async function getImageURL(image: string | null | undefined) {
+  if (!image) return;
+  return isValidURL(image)
+    ? image
+    : await createPresignedUrlToDownload({
+        bucketName: "startpad",
+        fileName: image,
+      });
+}
+
+export async function getStartupPosts(startup: SelectStartups) {
+  return await db.query.posts.findMany({
+    where: or(
+      eq(posts.createdByStartup, startup.id),
+      eq(posts.createdByUser, startup.founderId),
+    ),
+    with: {
+      createdByUser: true,
+      createdByStartup: true,
+    },
+    orderBy: (model, { desc }) => [desc(model.createdAt)],
+  });
 }
 
 export async function getStartupInfo(id: string) {

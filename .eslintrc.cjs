@@ -1,5 +1,15 @@
 /** @type {import("eslint").Linter.Config} */
 const config = {
+  ignorePatterns: [
+    "node_modules",
+    ".next",
+    "out",
+    "public",
+    "cypress",
+    "dist",
+    "data",
+    "src/components",
+  ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     project: true,

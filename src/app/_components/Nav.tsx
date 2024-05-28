@@ -1,11 +1,5 @@
 "use client";
-import {
-  Breadcrumb,
-  BreadcrumbList,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
@@ -22,11 +16,9 @@ import Link from "next/link";
 import React from "react";
 import {
   HelpCircleIcon,
-  Home,
   LogOut,
   Menu,
   Package2,
-  PanelLeft,
   Search,
   Settings,
   User,

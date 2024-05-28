@@ -5,7 +5,6 @@ import React, { useState, useEffect } from "react";
 import { createPost } from "@/server/actions";
 import TextEditor from "./TextEditor";
 import { Input } from "@/components/ui/input";
-import { useParams } from "next/navigation";
 
 import {
   Form,
@@ -33,7 +32,6 @@ import {
 export default function CreateNewPost({ user }: { user: UserWithStartups }) {
   const [content, setContent] = useState("");
 
-  const { id } = useParams<{ id: string }>();
   type Inputs = z.infer<typeof CreateNewPostSchema>;
   useEffect(() => {
     setValue("postContent", content);
@@ -99,7 +97,7 @@ export default function CreateNewPost({ user }: { user: UserWithStartups }) {
             />
             <div className="flex items-start space-x-4">
               <div className="flex-1">
-                <TextEditor content={content} setContent={setContent} />
+                <TextEditor setContent={setContent} />
                 <FormField
                   name="postContent"
                   control={form.control}

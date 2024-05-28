@@ -10,7 +10,6 @@ import { saveFileInBucket } from "../lib/minio";
 import { File } from "buffer";
 import { files, posts, startups, users } from "./db/schema";
 import { CreateNewPostSchema } from "@/lib/formSchema";
-import { uuid } from "drizzle-orm/pg-core";
 const fileSchema = z.instanceof(File).refine(
   (file) => {
     return (
