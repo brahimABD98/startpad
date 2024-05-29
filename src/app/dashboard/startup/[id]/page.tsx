@@ -8,8 +8,6 @@ import {
   CardContent,
   Card,
   CardFooter,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
