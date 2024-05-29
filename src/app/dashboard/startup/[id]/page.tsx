@@ -54,7 +54,6 @@ export default async function Page({ params }: { params: { id: string } }) {
               <TabsTrigger value="all-posts">All Posts</TabsTrigger>
               <TabsTrigger value="announcements">Announcements</TabsTrigger>
               <TabsTrigger value="gallery">Gallery</TabsTrigger>
-              <TabsTrigger value="trending">Trending</TabsTrigger>
             </TabsList>
             <TabsContent className="mt-8" value="all-posts">
               {is_owner && <CreateNewPost user={user} />}
@@ -75,105 +74,6 @@ export default async function Page({ params }: { params: { id: string } }) {
             </TabsContent>
             <TabsContent className="mt-8" value="gallery">
               <StartupGallery startup={startup_info} />
-            </TabsContent>
-            <TabsContent className="mt-8" value="trending">
-              <Card>
-                <CardHeader>
-                  <h3 className="mb-4 text-lg font-semibold">Trending Posts</h3>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="space-y-4">
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center space-x-4">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage
-                              alt="@shadcn"
-                              src="/placeholder-avatar.jpg"
-                            />
-                            <AvatarFallback>JP</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h4 className="font-semibold">Jared Palmer</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              @shadcn
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          May 1, 2024
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        <p>
-                          Lorem ipsum dolor sit amet consectetur adipisicing
-                          elit. Quaerat, dolores?
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <div className="flex items-center space-x-4">
-                          <Button size="icon" variant="ghost">
-                            <Heart className="h-5 w-5" />
-                            <span className="sr-only">Like</span>
-                          </Button>
-                          <Button size="icon" variant="ghost">
-                            <InboxIcon className="h-5 w-5" />
-                            <span className="sr-only">Comment</span>
-                          </Button>
-                          <Button size="icon" variant="ghost">
-                            <Share className="h-5 w-5" />
-                            <span className="sr-only">Share</span>
-                          </Button>
-                        </div>
-                      </CardFooter>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <div className="flex items-center space-x-4">
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage
-                              alt="@shadcn"
-                              src="/placeholder-avatar.jpg"
-                            />
-                            <AvatarFallback>JP</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h4 className="font-semibold">Jared Palmer</h4>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              @shadcn
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          April 30, 2024
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        <p>
-                          Lorem ipsum dolor sit amet consectetur adipisicing
-                          elit. Autem, ipsa.
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <div className="flex items-center space-x-4">
-                          <Button size="icon" variant="ghost">
-                            <Heart className="h-5 w-5" />
-                            <span className="sr-only">Like</span>
-                          </Button>
-                          <Button size="icon" variant="ghost">
-                            <InboxIcon className="h-5 w-5" />
-                            <span className="sr-only">Comment</span>
-                          </Button>
-                          <Button size="icon" variant="ghost">
-                            <Share className="h-5 w-5" />
-                            <span className="sr-only">Share</span>
-                          </Button>
-                        </div>
-                      </CardFooter>
-                    </Card>
-                  </div>
-                </CardContent>
-              </Card>
             </TabsContent>
           </Tabs>
         </div>
