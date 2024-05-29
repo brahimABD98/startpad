@@ -43,6 +43,18 @@ export const posts = createTable(
   }),
 );
 
+export const postimages = createTable(
+  "post_images",
+  {
+    postId: integer("postId").references(() => posts.id),
+    fileId: integer("file").references(() => files.id),
+    uploadedAt: timestamp("uploadedAt"),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.postId, table.fileId] }),
+  }),
+);
+
 export const startups = createTable("startup", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
@@ -138,11 +150,12 @@ export type UserWithStartups = SelectUser & {
   startups: SelectStartups[];
 };
 
-export const postsRelations = relations(posts, ({ one }) => ({
+export const postsRelations = relations(posts, ({ one, many }) => ({
   createdByUser: one(users, {
     fields: [posts.createdByUser],
     references: [users.id],
   }),
+  postImages: many(postimages),
   createdByStartup: one(startups, {
     fields: [posts.createdByStartup],
     references: [startups.id],
@@ -165,4 +178,13 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
   user: one(users, { fields: [accounts.userId], references: [users.id] }),
+}));
+
+export const fileRelations = relations(files, ({ many }) => ({
+  postImages: many(postimages),
+}));
+
+export const postImagesRelations = relations(postimages, ({ one }) => ({
+  post: one(posts, { fields: [postimages.postId], references: [posts.id] }),
+  file: one(files, { fields: [postimages.fileId], references: [files.id] }),
 }));

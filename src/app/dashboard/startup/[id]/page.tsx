@@ -16,6 +16,7 @@ import CreateNewPost from "@/app/_components/CreateNewPost";
 import { getStartupInfo, getUserWithStartups } from "@/server/queries";
 import { DisplayAllPosts } from "@/app/_components/DisplayAllPosts";
 import { Announcements } from "@/app/_components/Announcements";
+import { StartupGallery } from "@/app/_components/StartupGallery";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const startup_info = await getStartupInfo(params.id);
@@ -73,74 +74,7 @@ export default async function Page({ params }: { params: { id: string } }) {
               <Announcements startup={startup_info} />
             </TabsContent>
             <TabsContent className="mt-8" value="gallery">
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <Image
-                  alt="Gallery Image 1"
-                  className="rounded-lg object-cover"
-                  height={300}
-                  src="/placeholder.svg"
-                  style={{
-                    aspectRatio: "400/300",
-                    objectFit: "cover",
-                  }}
-                  width={400}
-                />
-                <Image
-                  alt="Gallery Image 2"
-                  className="rounded-lg object-cover"
-                  height={300}
-                  src="/placeholder.svg"
-                  style={{
-                    aspectRatio: "400/300",
-                    objectFit: "cover",
-                  }}
-                  width={400}
-                />
-                <Image
-                  alt="Gallery Image 3"
-                  className="rounded-lg object-cover"
-                  height={300}
-                  src="/placeholder.svg"
-                  style={{
-                    aspectRatio: "400/300",
-                    objectFit: "cover",
-                  }}
-                  width={400}
-                />
-                <Image
-                  alt="Gallery Image 4"
-                  className="rounded-lg object-cover"
-                  height={300}
-                  src="/placeholder.svg"
-                  style={{
-                    aspectRatio: "400/300",
-                    objectFit: "cover",
-                  }}
-                  width={400}
-                />
-                <Image
-                  alt="Gallery Image 5"
-                  className="rounded-lg object-cover"
-                  height={300}
-                  src="/placeholder.svg"
-                  style={{
-                    aspectRatio: "400/300",
-                    objectFit: "cover",
-                  }}
-                  width={400}
-                />
-                <Image
-                  alt="Gallery Image 6"
-                  className="rounded-lg object-cover"
-                  height={300}
-                  src="/placeholder.svg"
-                  style={{
-                    aspectRatio: "400/300",
-                    objectFit: "cover",
-                  }}
-                  width={400}
-                />
-              </div>
+              <StartupGallery startup={startup_info} />
             </TabsContent>
             <TabsContent className="mt-8" value="trending">
               <Card>

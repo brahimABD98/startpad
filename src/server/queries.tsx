@@ -2,8 +2,8 @@ import "server-only";
 import { db } from "./db";
 import { isValidURL } from "@/lib/utils";
 import { getServerAuthSession } from "./auth";
-import { eq, and, or } from "drizzle-orm";
-import { startups, posts } from "./db/schema";
+import { eq, and, or, inArray } from "drizzle-orm";
+import { startups, posts, postimages } from "./db/schema";
 import type { SelectStartups } from "./db/schema";
 import { createPresignedUrlToDownload } from "@/lib/minio";
 export async function getUserStartups() {
@@ -89,3 +89,20 @@ export const getStartupAnnouncements = async (startup: SelectStartups) => {
     },
   });
 };
+
+export async function getStartupImages(startup: SelectStartups) {
+  const posts = await getStartupPosts(startup);
+  const images = await db.query.postimages.findMany({
+    where: inArray(
+      postimages.postId,
+      posts.map((p) => p.id),
+    ),
+    with: {
+      file: true,
+    },
+  });
+  return images.map(async (image) => {
+    const url = await getImageURL(image.file?.fileName);
+    return { ...image, url };
+  });
+}
