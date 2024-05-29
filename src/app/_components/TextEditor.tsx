@@ -6,64 +6,72 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import ReactQuill from "react-quill";
+import ReactQuill, { Quill } from "react-quill";
 import "react-quill/dist/quill.snow.css";
 type TextEditorProps = {
+  content: string;
   setContent: React.Dispatch<React.SetStateAction<string>>;
 };
 
-const TextEditor = ({ setContent }: TextEditorProps) => {
+const TextEditor = ({ setContent, content }: TextEditorProps) => {
   const [isMounted, setIsMounted] = useState(false);
-  console.log(isMounted);
+
   const [value, setValue] = useState("");
   useEffect(() => {
     const prevState = localStorage.getItem("textEditorData");
     setValue(prevState ?? "");
-    if (typeof document !== "undefined") setIsMounted(true);
-  }, []);
+    setIsMounted(true);
+  }, [content]); // Run only on mount to prevent infinite loop
   const quillRef: React.LegacyRef<ReactQuill> = useRef(null);
 
   const openCustomFilePicker = useCallback(() => {
-    if (!isMounted) return null;
+    // Simulate a file input click event
 
-    const fileInput = document.createElement("input");
-    fileInput.setAttribute("type", "file");
-    fileInput.setAttribute("accept", "image/*");
-    fileInput.style.display = "none"; // Hide the input element
-    document.body.appendChild(fileInput);
-    fileInput.click();
+    if (isMounted) {
+      const fileInput = document.createElement("input");
+      fileInput.setAttribute("type", "file");
+      fileInput.setAttribute("accept", "image/*");
+      fileInput.style.display = "none"; // Hide the input element
+      document.body.appendChild(fileInput);
+      fileInput.click();
 
-    fileInput.onchange = async () => {
-      if (!fileInput.files) {
-        console.error("Error occurred while getting input");
-        return;
-      }
+      fileInput.onchange = async () => {
+        if (!fileInput.files) {
+          console.error("Error occurred while getting input");
+          return;
+        }
 
-      const file = fileInput.files[0];
-      if (!file) {
-        console.error("Error while getting file");
-        return;
-      }
+        const file = fileInput.files[0];
+        if (!file) {
+          console.error("Error while getting file");
+          return;
+        }
 
-      // TODO: Upload file to server (implementation depends on your backend)
-      // TODO:content moderation https://github.com/afoley587/hosting-yolo-fastapi
-      const imageUrl = uploadFileToServer(file); // Replace with your upload function
+        // TODO: Upload file to server (implementation depends on your backend)
+        // TODO:content moderation https://github.com/afoley587/hosting-yolo-fastapi
+        const imageUrl = uploadFileToServer(file); // Replace with your upload function
 
-      const quillEditor = quillRef.current?.getEditor();
-      if (!quillEditor) return;
+        // if (!imageUrl) {
+        //   console.error("Error uploading file");
+        //   return;
+        // }
 
-      const range = quillEditor.getSelection(true);
-      //FIXME : fix image insert inside texteditor
-      quillEditor.insertEmbed(range.index, "image", imageUrl, "user");
+        const quillEditor = quillRef.current?.getEditor();
+        if (!quillEditor) return;
 
-      document.body.removeChild(fileInput); // Remove the temporary input element
-    };
-  }, [isMounted]);
+        const range = quillEditor.getSelection(true);
+        //FIXME : fix image insert inside texteditor
+        quillEditor.insertEmbed(range.index, "image", imageUrl, "user");
+
+        document.body.removeChild(fileInput); // Remove the temporary input element
+      };
+    }
+  }, []);
 
   useEffect(() => {
     setContent(value);
     localStorage.setItem("textEditorData", value);
-  }, [value, setContent]); // Save value to localStorage whenever it changes
+  }, [value]); // Save value to localStorage whenever it changes
 
   const modules = useMemo(
     () => ({
@@ -99,7 +107,7 @@ const TextEditor = ({ setContent }: TextEditorProps) => {
 export default TextEditor;
 
 // This function needs to be implemented based on your backend
-function uploadFileToServer(_file: File) {
+function uploadFileToServer(file: File) {
   // Implement your upload logic here (e.g., using fetch API or a library like Axios)
   // This function should return the uploaded image URL on success
   throw new Error("uploadFileToServer not implemented");

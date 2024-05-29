@@ -13,7 +13,7 @@ export default async function DisplayAvatar({
   width,
 }: {
   src: string | null | undefined;
-  alt?: string;
+  alt: string | null | undefined;
   height?: number;
   width?: number;
 }) {
@@ -24,7 +24,7 @@ export default async function DisplayAvatar({
         <AvatarImage
           src={image}
           width={width ?? 40}
-          alt={alt}
+          alt={alt ?? "avatar"}
           height={height ?? 40}
         />
         <AvatarFallback>

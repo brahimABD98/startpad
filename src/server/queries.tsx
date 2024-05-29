@@ -73,3 +73,19 @@ export async function getStartupInfo(id: string) {
     where: and(eq(startups.id, Number(id)), eq(startups.founderId, userId)),
   });
 }
+
+export const getStartupAnnouncements = async (startup: SelectStartups) => {
+  return db.query.posts.findMany({
+    where: or(
+      and(eq(posts.createdByStartup, startup.id), eq(posts.is_pinned, true)),
+      and(
+        eq(posts.createdByUser, startup.founderId),
+        eq(posts.is_pinned, true),
+      ),
+    ),
+    with: {
+      createdByUser: true,
+      createdByStartup: true,
+    },
+  });
+};

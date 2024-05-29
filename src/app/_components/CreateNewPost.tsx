@@ -97,7 +97,7 @@ export default function CreateNewPost({ user }: { user: UserWithStartups }) {
             />
             <div className="flex items-start space-x-4">
               <div className="flex-1">
-                <TextEditor setContent={setContent} />
+                <TextEditor content={content} setContent={setContent} />
                 <FormField
                   name="postContent"
                   control={form.control}

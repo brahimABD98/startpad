@@ -17,6 +17,7 @@ import { Heart, InboxIcon, Mountain, Share } from "lucide-react";
 import CreateNewPost from "@/app/_components/CreateNewPost";
 import { getStartupInfo, getUserWithStartups } from "@/server/queries";
 import { DisplayAllPosts } from "@/app/_components/DisplayAllPosts";
+import { Announcements } from "@/app/_components/Announcements";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const startup_info = await getStartupInfo(params.id);
@@ -71,48 +72,7 @@ export default async function Page({ params }: { params: { id: string } }) {
               </Card>
             </TabsContent>
             <TabsContent className="mt-8" value="announcements">
-              <Card>
-                <CardHeader>
-                  <h3 className="mb-4 text-lg font-semibold">
-                    Pinned Announcements
-                  </h3>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="space-y-4">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>New Feature Release</CardTitle>
-                        <CardDescription>
-                          Lorem ipsum dolor sit amet, consectetur adipisicing
-                          elit. Eius, nemo!
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        <p>
-                          The new feature is designed to make your life easier.
-                          Check it out and let us know what you think!
-                        </p>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>Upcoming Maintenance</CardTitle>
-                        <CardDescription>
-                          Lorem ipsum dolor sit amet consectetur adipisicing
-                          elit. Officia, nam.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        <p>
-                          The maintenance will take place on Saturday, May 6th
-                          from 2am to 6am UTC. We apologize for any
-                          inconvenience.
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CardContent>
-              </Card>
+              <Announcements startup={startup_info} />
             </TabsContent>
             <TabsContent className="mt-8" value="gallery">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

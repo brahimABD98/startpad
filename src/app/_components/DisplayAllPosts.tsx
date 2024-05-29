@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/card";
 import { getStartupPosts } from "@/server/queries";
 import { Heart, InboxIcon, Share } from "lucide-react";
-import type{ SelectStartups } from "@/server/db/schema";
+import type { SelectStartups } from "@/server/db/schema";
+import { DisplayPostContent } from "./DisplayPostContent";
 
 export async function DisplayAllPosts({
   startup,
@@ -33,15 +34,15 @@ export async function DisplayAllPosts({
                   {post.createdByUser?.name ?? post.createdByStartup?.name}
                 </h4>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  @shadcn
+                  {post.updatedAt?.toLocaleDateString() ??
+                    post.createdAt.toLocaleDateString()}
                 </p>
               </div>
             </div>
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              May 2, 2024
-            </div>
           </CardHeader>
-          <CardContent className="p-4">{post.content}</CardContent>
+          <CardContent className="p-4">
+            <DisplayPostContent content={post.content} />
+          </CardContent>
           <CardFooter>
             <div className="flex items-center space-x-4">
               <Button size="icon" variant="ghost">
