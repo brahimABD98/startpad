@@ -8,7 +8,6 @@ import {
 import type { SelectStartups } from "@/server/db/schema";
 import { getStartupAnnouncements } from "@/server/queries";
 import React from "react";
-import ReactQuill from "react-quill";
 import { DisplayPostContent } from "./DisplayPostContent";
 import GetAvatar from "./GetAvatar";
 

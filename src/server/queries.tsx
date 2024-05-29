@@ -4,7 +4,7 @@ import { isValidURL } from "@/lib/utils";
 import { getServerAuthSession } from "./auth";
 import { eq, and, or, inArray } from "drizzle-orm";
 import { startups, posts, postimages } from "./db/schema";
-import type { SelectStartups } from "./db/schema";
+import type { SelectPosts, SelectStartups } from "./db/schema";
 import { createPresignedUrlToDownload } from "@/lib/minio";
 export async function getUserStartups() {
   const session = await getServerAuthSession();
@@ -90,9 +90,8 @@ export const getStartupAnnouncements = async (startup: SelectStartups) => {
   });
 };
 
-export async function getStartupImages(startup: SelectStartups) {
-  const posts = await getStartupPosts(startup);
-  const images = await db.query.postimages.findMany({
+export async function getStartupImages(posts: SelectPosts[]) {
+  return db.query.postimages.findMany({
     where: inArray(
       postimages.postId,
       posts.map((p) => p.id),
@@ -100,9 +99,5 @@ export async function getStartupImages(startup: SelectStartups) {
     with: {
       file: true,
     },
-  });
-  return images.map(async (image) => {
-    const url = await getImageURL(image.file?.fileName);
-    return { ...image, url };
   });
 }

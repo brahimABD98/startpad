@@ -1,5 +1,4 @@
 import React from "react";
-
 import Image from "next/image";
 import Link from "next/link";
 import { TabsTrigger, TabsList, TabsContent, Tabs } from "@/components/ui/tabs";
@@ -7,11 +6,8 @@ import {
   CardHeader,
   CardContent,
   Card,
-  CardFooter,
 } from "@/components/ui/card";
-import { AvatarImage, AvatarFallback, Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Heart, InboxIcon, Mountain, Share } from "lucide-react";
+import {  Mountain } from "lucide-react";
 import CreateNewPost from "@/app/_components/CreateNewPost";
 import { getStartupInfo, getUserWithStartups } from "@/server/queries";
 import { DisplayAllPosts } from "@/app/_components/DisplayAllPosts";

@@ -146,6 +146,11 @@ export const verificationTokens = createTable(
 export type SelectUser = typeof users.$inferSelect;
 export type SelectStartups = typeof startups.$inferSelect;
 
+export type SelectPosts = typeof posts.$inferSelect;
+export type StartupWithPosts = SelectStartups & {
+  posts: SelectPosts[];
+};
+
 export type UserWithStartups = SelectUser & {
   startups: SelectStartups[];
 };
