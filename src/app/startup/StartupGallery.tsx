@@ -1,12 +1,7 @@
 import type { SelectStartups, StartupWithPosts } from "@/server/db/schema";
 import React from "react";
-import Image from "next/image";
-import {
-  getImageURL,
-  getStartupImages,
-  getStartupPosts,
-} from "@/server/queries";
-import { DisplayServerImages } from "./DisplayServerImages";
+import { getStartupImages, getStartupPosts } from "@/server/queries";
+import { DisplayServerImages } from "@/app/_components/DisplayServerImages";
 export async function StartupGallery({ startup }: { startup: SelectStartups }) {
   const posts = await getStartupPosts(startup);
   if (!posts) return null;
@@ -24,3 +19,4 @@ export async function StartupGallery({ startup }: { startup: SelectStartups }) {
     </div>
   );
 }
+

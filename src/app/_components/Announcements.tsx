@@ -8,7 +8,7 @@ import {
 import type { SelectStartups } from "@/server/db/schema";
 import { getStartupAnnouncements } from "@/server/queries";
 import React from "react";
-import { DisplayPostContent } from "./DisplayPostContent";
+import { DisplayPostContent } from "./DisplayTextEditorContent";
 import GetAvatar from "./GetAvatar";
 
 export async function Announcements({ startup }: { startup: SelectStartups }) {

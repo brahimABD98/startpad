@@ -1,19 +1,24 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { TabsTrigger, TabsList, TabsContent, Tabs } from "@/components/ui/tabs";
-import {
-  CardHeader,
-  CardContent,
-  Card,
-} from "@/components/ui/card";
-import {  Mountain } from "lucide-react";
+import { CardHeader, CardContent, Card } from "@/components/ui/card";
+import { Mountain } from "lucide-react";
 import CreateNewPost from "@/app/_components/CreateNewPost";
 import { getStartupInfo, getUserWithStartups } from "@/server/queries";
 import { DisplayAllPosts } from "@/app/_components/DisplayAllPosts";
 import { Announcements } from "@/app/_components/Announcements";
-import { StartupGallery } from "@/app/_components/StartupGallery";
-
+import { StartupGallery } from "@/app/startup/StartupGallery";
+import { Skeleton } from "@/components/ui/skeleton";
+function GallerySkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <Skeleton className="h-48 w-full" />
+      <Skeleton className="h-48 w-full" />
+      <Skeleton className="h-48 w-full" />
+    </div>
+  );
+}
 export default async function Page({ params }: { params: { id: string } }) {
   const startup_info = await getStartupInfo(params.id);
   if (!startup_info) return null;
@@ -60,7 +65,13 @@ export default async function Page({ params }: { params: { id: string } }) {
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="space-y-4">
-                    <DisplayAllPosts startup={startup_info} />
+                    <Suspense
+                      fallback={
+                        <div className="text-red-400">loading.....</div>
+                      }
+                    >
+                      <DisplayAllPosts startup={startup_info} />
+                    </Suspense>
                   </div>
                 </CardContent>
               </Card>
@@ -69,7 +80,9 @@ export default async function Page({ params }: { params: { id: string } }) {
               <Announcements startup={startup_info} />
             </TabsContent>
             <TabsContent className="mt-8" value="gallery">
-              <StartupGallery startup={startup_info} />
+              <Suspense fallback={<GallerySkeleton />}>
+                <StartupGallery startup={startup_info} />
+              </Suspense>
             </TabsContent>
           </Tabs>
         </div>

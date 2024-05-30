@@ -10,7 +10,7 @@ import {
 import { getStartupPosts } from "@/server/queries";
 import { Heart, InboxIcon, Share } from "lucide-react";
 import type { SelectStartups } from "@/server/db/schema";
-import { DisplayPostContent } from "./DisplayPostContent";
+import { DisplayPostContent } from "./DisplayTextEditorContent";
 
 export async function DisplayAllPosts({
   startup,

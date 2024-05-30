@@ -42,6 +42,8 @@ export async function getUserWithStartups() {
   5;
 }
 export async function getImageURL(image: string | null | undefined) {
+  //add 4 sec latency
+  await new Promise((res) => setTimeout(res, 10000));
   if (!image) return;
   return isValidURL(image)
     ? image
@@ -91,6 +93,8 @@ export const getStartupAnnouncements = async (startup: SelectStartups) => {
 };
 
 export async function getStartupImages(posts: SelectPosts[]) {
+  // add 10 sec delay
+  await new Promise((res) => setTimeout(res, 10000));
   return db.query.postimages.findMany({
     where: inArray(
       postimages.postId,
