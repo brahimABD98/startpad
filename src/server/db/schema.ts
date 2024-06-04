@@ -10,6 +10,7 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
+import { Speaker } from "lucide-react";
 import { type AdapterAccount } from "next-auth/adapters";
 
 /**
@@ -20,6 +21,22 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `startpad_${name}`);
 
+export const conferences = createTable("conferences", {
+  id: varchar("id", { length: 255 }).notNull().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  startDate: timestamp("startDate").notNull(),
+  endDate: timestamp("endDate"),
+  createdBy: integer("createdBy").references(() => startups.id),
+});
+
+export const conferenceSpeakers = createTable("conference_speakers", {
+  id: serial("id").primaryKey(),
+  conferenceId: varchar("conferenceId", { length: 255 }).references(
+    () => conferences.id,
+  ),
+  speakerId: varchar("speakerId", { length: 255 }).references(() => users.id),
+});
 export const posts = createTable(
   "post",
   {
@@ -179,6 +196,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   startups: many(startups),
   posts: many(posts),
+  conferenceSpeakers: many(conferenceSpeakers),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -193,3 +211,21 @@ export const postImagesRelations = relations(postimages, ({ one }) => ({
   post: one(posts, { fields: [postimages.postId], references: [posts.id] }),
   file: one(files, { fields: [postimages.fileId], references: [files.id] }),
 }));
+
+export const conferenceRelations = relations(conferences, ({ many }) => ({
+  conferencespeakers: many(conferenceSpeakers),
+}));
+
+export const conferenceSpeakersRelations = relations(
+  conferenceSpeakers,
+  ({ one }) => ({
+    conference: one(conferences, {
+      fields: [conferenceSpeakers.conferenceId],
+      references: [conferences.id],
+    }),
+    speaker: one(users, {
+      fields: [conferenceSpeakers.speakerId],
+      references: [users.id],
+    }),
+  }),
+);
