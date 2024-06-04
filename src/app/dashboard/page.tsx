@@ -30,7 +30,7 @@ import {
 import { getServerAuthSession } from "@/server/auth";
 import { getUserStartups } from "@/server/queries";
 import Nav from "../_components/Nav";
-import AddStartup from "../_components/AddStartup";
+import AddStartup from "../startup/AddStartup";
 
 export default async function Page() {
   const session = await getServerAuthSession();

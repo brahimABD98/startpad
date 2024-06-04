@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   pgTableCreator,
@@ -23,18 +24,34 @@ export const posts = createTable(
   "post",
   {
     id: serial("id").primaryKey(),
-    name: varchar("name", { length: 256 }),
-    createdById: varchar("createdById", { length: 255 })
-      .notNull()
-      .references(() => users.id),
+    title: varchar("title", { length: 256 }),
+    createdByUser: varchar("createdById", { length: 255 }).references(
+      () => users.id,
+    ),
+    createdByStartup: integer("createdByStartup").references(() => startups.id),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     updatedAt: timestamp("updatedAt"),
+    is_pinned: boolean("is_pinned").default(false),
+    content: text("content").notNull(),
   },
   (example) => ({
-    createdByIdIdx: index("createdById_idx").on(example.createdById),
-    nameIndex: index("name_idx").on(example.name),
+    createdByIdIdx: index("createdById_idx").on(example.createdByUser),
+    createdBySidIdx: index("createdByStartup_idx").on(example.createdByStartup),
+    nameIndex: index("name_idx").on(example.title),
+  }),
+);
+
+export const postimages = createTable(
+  "post_images",
+  {
+    postId: integer("postId").references(() => posts.id),
+    fileId: integer("file").references(() => files.id),
+    uploadedAt: timestamp("uploadedAt"),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.postId, table.fileId] }),
   }),
 );
 
@@ -48,9 +65,6 @@ export const startups = createTable("startup", {
     .notNull()
     .references(() => users.id),
 });
-export const startupsRelations = relations(startups, ({ one }) => ({
-  founder: one(users, { fields: [startups.founderId], references: [users.id] }),
-}));
 
 export const files = createTable("file", {
   id: serial("id").primaryKey(),
@@ -73,11 +87,6 @@ export const users = createTable("user", {
   image: varchar("image", { length: 255 }),
   phoneNumber: varchar("phoneNumber", { length: 255 }),
 });
-
-export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
-  startups: many(startups),
-}));
 
 export const accounts = createTable(
   "account",
@@ -106,10 +115,6 @@ export const accounts = createTable(
   }),
 );
 
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, { fields: [accounts.userId], references: [users.id] }),
-}));
-
 export const sessions = createTable(
   "session",
   {
@@ -126,10 +131,6 @@ export const sessions = createTable(
   }),
 );
 
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, { fields: [sessions.userId], references: [users.id] }),
-}));
-
 export const verificationTokens = createTable(
   "verificationToken",
   {
@@ -143,3 +144,52 @@ export const verificationTokens = createTable(
 );
 
 export type SelectUser = typeof users.$inferSelect;
+export type SelectStartups = typeof startups.$inferSelect;
+
+export type SelectPosts = typeof posts.$inferSelect;
+export type StartupWithPosts = SelectStartups & {
+  posts: SelectPosts[];
+};
+
+export type UserWithStartups = SelectUser & {
+  startups: SelectStartups[];
+};
+
+export const postsRelations = relations(posts, ({ one, many }) => ({
+  createdByUser: one(users, {
+    fields: [posts.createdByUser],
+    references: [users.id],
+  }),
+  postImages: many(postimages),
+  createdByStartup: one(startups, {
+    fields: [posts.createdByStartup],
+    references: [startups.id],
+  }),
+}));
+
+export const startupsRelations = relations(startups, ({ one }) => ({
+  founder: one(users, { fields: [startups.founderId], references: [users.id] }),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, { fields: [sessions.userId], references: [users.id] }),
+}));
+
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  startups: many(startups),
+  posts: many(posts),
+}));
+
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+}));
+
+export const fileRelations = relations(files, ({ many }) => ({
+  postImages: many(postimages),
+}));
+
+export const postImagesRelations = relations(postimages, ({ one }) => ({
+  post: one(posts, { fields: [postimages.postId], references: [posts.id] }),
+  file: one(files, { fields: [postimages.fileId], references: [files.id] }),
+}));

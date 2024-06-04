@@ -8,7 +8,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { saveFileInBucket } from "../lib/minio";
 import { File } from "buffer";
-import { files, startups, users } from "./db/schema";
+import { files, posts, startups, users } from "./db/schema";
+import { CreateNewPostSchema } from "@/lib/formSchema";
 const fileSchema = z.instanceof(File).refine(
   (file) => {
     return (
@@ -55,6 +56,7 @@ export async function updateProfile(
 
   const new_file = {
     id: file_id,
+    originalName: data.image?.name ?? "default.png",
     fileName: `${file_id}.${data.image?.type.split("/")[1]}` ?? "default.png",
     size: data.image?.size ?? 0,
     bucket: "startpad",
@@ -73,7 +75,7 @@ export async function updateProfile(
     await db
       .insert(files)
       .values({
-        originalName: new_file.fileName,
+        originalName: new_file.originalName,
         bucket: new_file.bucket,
         fileName: new_file.fileName,
         size: new_file.size,
@@ -115,6 +117,40 @@ export async function deleteProfile() {
   revalidatePath("/dashboard/settings/profile");
   redirect("/");
 }
+const uuidSchema = z.string().uuid();
+export async function createPost(
+  formData: z.infer<typeof CreateNewPostSchema>,
+) {
+  const data = CreateNewPostSchema.parse(formData);
+
+  if (!data) throw new Error("Invalid form data");
+  const { data: uuid } = uuidSchema.safeParse(data.author_id);
+  if (uuid) {
+    const new_post = await db
+      .insert(posts)
+      .values({
+        title: data.title,
+        createdByUser: uuid,
+        content: data.postContent,
+        is_pinned: data.markpinned,
+      })
+      .returning({ id: posts.id });
+    revalidatePath("/dashboard/startup/[id]", "page");
+    return { id: new_post[0]?.id };
+  }
+  const new_post = await db
+    .insert(posts)
+    .values({
+      content: data.postContent,
+      title: data.title,
+      is_pinned: data.markpinned,
+      createdByStartup: parseInt(data.author_id),
+    })
+    .returning({ id: posts.id });
+  revalidatePath("/dashboard/startup/[id]", "page");
+
+  return { id: new_post[0]?.id };
+}
 
 export async function createStartup(formData: FormData) {
   console.log(formData.entries());
@@ -148,7 +184,7 @@ export async function createStartup(formData: FormData) {
       description: description,
       foundedAt: new Date(foundedAt),
       logo: logo?.name ?? "default.png",
-      founderId: session.user.id, 
+      founderId: session.user.id,
     })
     .returning({ id: startups.id })
     .catch((e) => {
