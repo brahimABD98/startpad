@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Calendar } from "lucide-react";
 import Image from "next/image";
+import { NewConference } from "./NewConference";
 export default function Component() {
   return (
     <div className="flex min-h-screen flex-col">
@@ -35,7 +36,7 @@ export default function Component() {
             Upcoming Conferences
           </h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <Card>
+            <Card className="p-4">
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -59,7 +60,7 @@ export default function Component() {
                 </Button>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="p-4">
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -78,9 +79,7 @@ export default function Component() {
                   Improve your communication skills and learn how to effectively
                   collaborate with your team.
                 </p>
-                <Button variant="outline" className="w-full">
-                  Join
-                </Button>
+                <NewConference />
               </CardContent>
             </Card>
             <Card>

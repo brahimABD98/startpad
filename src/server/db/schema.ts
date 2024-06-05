@@ -10,8 +10,10 @@ import {
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
-import { Speaker } from "lucide-react";
+import { z } from "zod";
 import { type AdapterAccount } from "next-auth/adapters";
+import { createInsertSchema } from "drizzle-zod";
+import { customAlphabet } from "nanoid";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -21,22 +23,33 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `startpad_${name}`);
 
+const nanoid = customAlphabet("abcdefghijklmnpqrstuvwxyz0123456789", 14);
+
 export const conferences = createTable("conferences", {
-  id: varchar("id", { length: 255 }).notNull().primaryKey(),
+  id: varchar("id", { length: 255 })
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description").notNull(),
   startDate: timestamp("startDate").notNull(),
-  endDate: timestamp("endDate"),
   createdBy: integer("createdBy").references(() => startups.id),
 });
 
-export const conferenceSpeakers = createTable("conference_speakers", {
-  id: serial("id").primaryKey(),
-  conferenceId: varchar("conferenceId", { length: 255 }).references(
-    () => conferences.id,
-  ),
-  speakerId: varchar("speakerId", { length: 255 }).references(() => users.id),
-});
+export const conferenceSpeakers = createTable(
+  "conference_speakers",
+  {
+    conferenceId: varchar("conferenceId", { length: 255 })
+      .references(() => conferences.id)
+      .notNull(),
+    speakerId: varchar("speakerId", { length: 255 })
+      .references(() => users.id)
+      .notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.speakerId, table.conferenceId] }),
+  }),
+);
 export const posts = createTable(
   "post",
   {
@@ -63,8 +76,12 @@ export const posts = createTable(
 export const postimages = createTable(
   "post_images",
   {
-    postId: integer("postId").references(() => posts.id),
-    fileId: integer("file").references(() => files.id),
+    postId: integer("postId")
+      .references(() => posts.id)
+      .notNull(),
+    fileId: integer("file")
+      .references(() => files.id)
+      .notNull(),
     uploadedAt: timestamp("uploadedAt"),
   },
   (table) => ({
@@ -229,3 +246,5 @@ export const conferenceSpeakersRelations = relations(
     }),
   }),
 );
+
+export const insertConferenceSchema = createInsertSchema(conferences);
