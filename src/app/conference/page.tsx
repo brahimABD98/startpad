@@ -3,7 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Calendar } from "lucide-react";
 import Image from "next/image";
 import { NewConference } from "./NewConference";
-export default function Component() {
+import { getUserStartups } from "@/server/queries";
+export default async function Page() {
+  const user_startups = await getUserStartups();
   return (
     <div className="flex min-h-screen flex-col">
       <section className="bg-gray-100 py-12 dark:bg-gray-800 md:py-20 lg:py-24">
@@ -79,7 +81,7 @@ export default function Component() {
                   Improve your communication skills and learn how to effectively
                   collaborate with your team.
                 </p>
-                <NewConference />
+                <NewConference startups={user_startups} />
               </CardContent>
             </Card>
             <Card>

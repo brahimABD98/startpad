@@ -1,6 +1,6 @@
 "use server";
 import { v4 as uuidv4 } from "uuid";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { getServerAuthSession } from "./auth";
 import { db } from "./db";
@@ -8,7 +8,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { saveFileInBucket } from "../lib/minio";
 import { File } from "buffer";
-import { files, posts, startups, users } from "./db/schema";
+import {
+  files,
+  posts,
+  startups,
+  users,
+  insertConferenceSchema,
+  conferences,
+} from "./db/schema";
 import { CreateNewPostSchema } from "@/lib/formSchema";
 const fileSchema = z.instanceof(File).refine(
   (file) => {
@@ -118,6 +125,35 @@ export async function deleteProfile() {
   redirect("/");
 }
 const uuidSchema = z.string().uuid();
+export async function createConfernence(
+  formData: z.infer<typeof insertConferenceSchema>,
+) {
+  const data = insertConferenceSchema.parse(formData);
+  if (!data) throw new Error("Invalid data");
+
+  const session = await getServerAuthSession();
+  if (!session) return { message: "Unauthorized" };
+
+  // check if data.createdby is in users.startups
+  const startup = await db.query.startups.findFirst({
+    where: and(
+      eq(startups.id, data.createdBy),
+      eq(startups.founderId, session?.user.id),
+    ),
+  });
+  if (!startup) return { message: "Unauthorized" };
+
+  const new_conference = await db
+    .insert(conferences)
+    .values({
+      startDate: data.startDate,
+      name: data.name,
+      description: data.description,
+      createdBy: startup.id,
+    })
+    .returning({ id: conferences.id });
+  redirect(`/conference/${new_conference[0]?.id}`);
+}
 export async function createPost(
   formData: z.infer<typeof CreateNewPostSchema>,
 ) {
@@ -144,7 +180,7 @@ export async function createPost(
       content: data.postContent,
       title: data.title,
       is_pinned: data.markpinned,
-      createdByStartup: parseInt(data.author_id),
+      createdByStartup: data.author_id,
     })
     .returning({ id: posts.id });
   revalidatePath("/dashboard/startup/[id]", "page");

@@ -5,7 +5,6 @@ import {
   integer,
   pgTableCreator,
   primaryKey,
-  serial,
   text,
   timestamp,
   varchar,
@@ -14,6 +13,7 @@ import { z } from "zod";
 import { type AdapterAccount } from "next-auth/adapters";
 import { createInsertSchema } from "drizzle-zod";
 import { customAlphabet } from "nanoid";
+import { generateConferenceId } from "@/lib/utils";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -29,11 +29,13 @@ export const conferences = createTable("conferences", {
   id: varchar("id", { length: 255 })
     .notNull()
     .primaryKey()
-    .$defaultFn(() => nanoid()),
+    .$defaultFn(() => generateConferenceId()),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description").notNull(),
-  startDate: timestamp("startDate").notNull(),
-  createdBy: integer("createdBy").references(() => startups.id),
+  startDate: timestamp("startDate", { mode: "string" }).notNull(),
+  createdBy: varchar("createdBy")
+    .references(() => startups.id)
+    .notNull(),
 });
 
 export const conferenceSpeakers = createTable(
@@ -53,12 +55,14 @@ export const conferenceSpeakers = createTable(
 export const posts = createTable(
   "post",
   {
-    id: serial("id").primaryKey(),
+    id: varchar("id")
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
     title: varchar("title", { length: 256 }),
     createdByUser: varchar("createdById", { length: 255 }).references(
       () => users.id,
     ),
-    createdByStartup: integer("createdByStartup").references(() => startups.id),
+    createdByStartup: varchar("createdByStartup").references(() => startups.id),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -76,10 +80,10 @@ export const posts = createTable(
 export const postimages = createTable(
   "post_images",
   {
-    postId: integer("postId")
+    postId: varchar("postId")
       .references(() => posts.id)
       .notNull(),
-    fileId: integer("file")
+    fileId: varchar("file")
       .references(() => files.id)
       .notNull(),
     uploadedAt: timestamp("uploadedAt"),
@@ -90,7 +94,9 @@ export const postimages = createTable(
 );
 
 export const startups = createTable("startup", {
-  id: serial("id").primaryKey(),
+  id: varchar("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description").notNull(),
   foundedAt: timestamp("foundedAt", { mode: "date" }).notNull(),
@@ -101,7 +107,9 @@ export const startups = createTable("startup", {
 });
 
 export const files = createTable("file", {
-  id: serial("id").primaryKey(),
+  id: varchar("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
   fileName: varchar("fileName", { length: 255 }).notNull(),
   bucket: varchar("bucket", { length: 255 }).notNull(),
   originalName: varchar("originalName", { length: 255 }).notNull(),
@@ -135,7 +143,7 @@ export const accounts = createTable(
     providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
-    expires_at: integer("expires_at"),
+    expires_at: varchar("expires_at"),
     token_type: varchar("token_type", { length: 255 }),
     scope: varchar("scope", { length: 255 }),
     id_token: text("id_token"),
@@ -248,3 +256,6 @@ export const conferenceSpeakersRelations = relations(
 );
 
 export const insertConferenceSchema = createInsertSchema(conferences);
+
+// TODO: REFACTOR FILE ID TO USE UUID BY DEFAULT
+// TODO: REFACTOR ID TO USE NANOID BY DEFAULT
