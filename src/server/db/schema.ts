@@ -257,5 +257,4 @@ export const conferenceSpeakersRelations = relations(
 
 export const insertConferenceSchema = createInsertSchema(conferences);
 
-// TODO: REFACTOR FILE ID TO USE UUID BY DEFAULT
-// TODO: REFACTOR ID TO USE NANOID BY DEFAULT
+
