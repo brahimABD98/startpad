@@ -3,9 +3,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Clock, Calendar } from "lucide-react";
 import Image from "next/image";
 import { NewConference } from "./NewConference";
-import { getUserStartups } from "@/server/queries";
+import { getLatestConferences, getUserStartups } from "@/server/queries";
+import { getDate, getTime } from "@/lib/utils";
 export default async function Page() {
   const user_startups = await getUserStartups();
+  const lastestConferences = await getLatestConferences();
   return (
     <div className="flex min-h-screen flex-col">
       <section className="bg-gray-100 py-12 dark:bg-gray-800 md:py-20 lg:py-24">
@@ -18,7 +20,7 @@ export default async function Page() {
               <p className="text-lg text-gray-500 dark:text-gray-400">
                 Join video conferences with your colleagues and stay connected.
               </p>
-              <Button className="w-full sm:w-auto">Join a Conference</Button>
+              <NewConference startups={user_startups} />
             </div>
             <div className="hidden md:block">
               <Image
@@ -38,74 +40,33 @@ export default async function Page() {
             Upcoming Conferences
           </h2>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <Card className="p-4">
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                    <span className="text-sm font-medium">June 15, 2023</span>
+            {lastestConferences.map((conference) => (
+              <Card key={conference.id} className="p-4">
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                      <span className="text-sm font-medium">
+                        {getDate(conference.startDate.toString())}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                      <span className="text-sm font-medium">
+                        {getTime(conference.startDate.toString())}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                    <span className="text-sm font-medium">2:00 PM</span>
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold">
-                  Agile Project Management
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Learn how to effectively manage your projects using Agile
-                  methodologies.
-                </p>
-                <Button variant="outline" className="w-full">
-                  Join
-                </Button>
-              </CardContent>
-            </Card>
-            <Card className="p-4">
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                    <span className="text-sm font-medium">June 22, 2023</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                    <span className="text-sm font-medium">4:00 PM</span>
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold">
-                  Effective Communication in the Workplace
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Improve your communication skills and learn how to effectively
-                  collaborate with your team.
-                </p>
-                <NewConference startups={user_startups} />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                    <span className="text-sm font-medium">June 29, 2023</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-gray-500 dark:text-gray-400" />
-                    <span className="text-sm font-medium">10:00 AM</span>
-                  </div>
-                </div>
-                <h3 className="text-lg font-semibold">Mastering Remote Work</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Explore best practices and strategies for effective remote
-                  work.
-                </p>
-                <Button variant="outline" className="w-full">
-                  Join
-                </Button>
-              </CardContent>
-            </Card>
+                  <h3 className="text-lg font-semibold">{conference.name}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {conference.description}
+                  </p>
+                  <Button variant="outline" className="w-full">
+                    Join
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>

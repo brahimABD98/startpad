@@ -7,6 +7,8 @@ import { db } from "./db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { saveFileInBucket } from "../lib/minio";
+import { AccessToken } from "livekit-server-sdk";
+import { env } from "@/env";
 import { File } from "buffer";
 import {
   files,
@@ -229,4 +231,19 @@ export async function createStartup(formData: FormData) {
     });
   revalidatePath(`/dashboard/startups`);
   redirect(`/dashboard/startup/${new_startup[0]?.id}`);
+}
+
+export async function generateParticiaptionToken(roomid: string) {
+  const session = await getServerAuthSession();
+  if (!session) return { message: "Unauthorized" };
+  const room = await db.query.conferences.findFirst({
+    where: eq(conferences.id, roomid),
+  });
+  if (!room) return { message: "Room not found" };
+  const token = new AccessToken(env.LIVEKIT_API_KEY, env.LIVEKIT_API_SECRET, {
+    identity: session.user.id,
+    ttl: "20m",
+  });
+  token.addGrant({ roomJoin: true, room: roomid });
+  return await token.toJwt();
 }

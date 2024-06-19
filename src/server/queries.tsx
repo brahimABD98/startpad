@@ -101,3 +101,9 @@ export async function getStartupImages(posts: SelectPosts[]) {
     },
   });
 }
+
+export async function getLatestConferences() {
+  return await db.query.conferences.findMany({
+    orderBy: (model, { desc }) => [desc(model.startDate)],
+  });
+}

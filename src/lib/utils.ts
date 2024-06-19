@@ -19,3 +19,9 @@ export function generateConferenceId() {
   const new_id = nanoid();
   return new_id.match(/.{1,4}/g)?.join("-") ?? new_id;
 }
+export const getDate = (date: string) => {
+  return new Date(date).toLocaleDateString();
+};
+export const getTime = (date: string) => {
+  return new Date(date).toLocaleTimeString();
+};

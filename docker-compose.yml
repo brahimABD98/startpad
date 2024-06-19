@@ -20,14 +20,14 @@ services:
       POSTGRES_DB: startpad
     volumes:
       - db-data:/var/lib/postgresql/data
-  srs:
-    image: ossrs/srs:5
-    ports:
-      - "1935:1935"
-      - "1985:1985"
-      - "8080:8080"
-      - "8000:8000/udp"
-      - "10080:10080/udp"
+  # srs:
+  #   image: ossrs/srs:5
+  #   ports:
+  #     - "1935:1935"
+  #     - "1985:1985"
+  #     - "8080:8080"
+  #     - "8000:8000/udp"
+  #     - "10080:10080/udp"
 
   pgadmin:
     image: dpage/pgadmin4
