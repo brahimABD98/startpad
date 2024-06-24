@@ -235,11 +235,11 @@ export async function createStartup(formData: FormData) {
 
 export async function generateParticiaptionToken(roomid: string) {
   const session = await getServerAuthSession();
-  if (!session) return { message: "Unauthorized" };
+  if (!session) throw new Error("Unauthorized");
   const room = await db.query.conferences.findFirst({
     where: eq(conferences.id, roomid),
   });
-  if (!room) return { message: "Room not found" };
+  if (!room) throw new Error("Room not found");
   const token = new AccessToken(env.LIVEKIT_API_KEY, env.LIVEKIT_API_SECRET, {
     identity: session.user.id,
     ttl: "20m",

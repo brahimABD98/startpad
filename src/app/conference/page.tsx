@@ -5,6 +5,7 @@ import Image from "next/image";
 import { NewConference } from "./NewConference";
 import { getLatestConferences, getUserStartups } from "@/server/queries";
 import { getDate, getTime } from "@/lib/utils";
+import Link from "next/link";
 export default async function Page() {
   const user_startups = await getUserStartups();
   const lastestConferences = await getLatestConferences();
@@ -61,9 +62,11 @@ export default async function Page() {
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {conference.description}
                   </p>
-                  <Button variant="outline" className="w-full">
-                    Join
-                  </Button>
+                  <Link href={`/conference/${conference.id}`}>
+                    <Button variant="outline" className="w-full">
+                      Join
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}

@@ -36,7 +36,6 @@ export const env = createEnv({
     S3_USE_SSL: z.string().default("true"),
     LIVEKIT_API_KEY: z.string(),
     LIVEKIT_API_SECRET: z.string(),
-    PUBLIC_LIVEKIT_URL: z.string(),
   },
 
   /**
@@ -46,6 +45,7 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
+    NEXT_PUBLIC_LIVEKIT_URL: z.string(),
   },
 
   /**
@@ -71,7 +71,7 @@ export const env = createEnv({
     S3_USE_SSL: process.env.S3_USE_SSL,
     LIVEKIT_API_KEY: process.env.LIVEKIT_API_KEY,
     LIVEKIT_API_SECRET: process.env.LIVEKIT_API_SECRET,
-    PUBLIC_LIVEKIT_URL: process.env.PUBLIC_LIVEKIT_URL,
+    NEXT_PUBLIC_LIVEKIT_URL: process.env.NEXT_PUBLIC_LIVEKIT_URL,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

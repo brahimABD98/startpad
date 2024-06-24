@@ -80,6 +80,9 @@ dependencies:
   drizzle-zod:
     specifier: ^0.5.1
     version: 0.5.1(drizzle-orm@0.29.5)(zod@3.23.8)
+  livekit-client:
+    specifier: ^2.3.0
+    version: 2.3.0
   livekit-server-sdk:
     specifier: ^2.4.0
     version: 2.4.0
