@@ -38,8 +38,24 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     volumes:
       - pgadmin-data:/var/lib/pgadmin
+  
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  # moderation:
+  #   image: ghcr.io/brahimabd98/moderation_api_py:main
+  #   ports:
+  #     - "5555:5555"
+  #     - "9095:9095"
+  #   environment:
+  #     DATABASE_URL: redis://localhost:6379/0 
 
 volumes:
   minio-data:
   db-data:
   pgadmin-data:
+  redis-data:

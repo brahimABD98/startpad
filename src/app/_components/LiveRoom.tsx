@@ -42,6 +42,7 @@ export function LiveRoom({
         data-lk-theme="default"
       >
         <MyVideoConference />
+        <RoomAudioRenderer />
         <ControlBar />
       </LiveKitRoom>
     </>

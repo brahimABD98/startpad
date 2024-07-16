@@ -13,9 +13,7 @@ import { createStartup } from "@/server/actions";
 export default function AddStartup() {
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline">Add Startup</Button>
-      </DialogTrigger>
+      <DialogTrigger>Add Startup</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add a new startup</DialogTitle>
