@@ -10,10 +10,18 @@ import {
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { createStartup } from "@/server/actions";
+import { PlusCircle } from "lucide-react";
 export default function AddStartup() {
   return (
     <Dialog>
-      <DialogTrigger>Add Startup</DialogTrigger>
+      <DialogTrigger asChild>
+        <Button size="sm" className="h-8 gap-1">
+          <PlusCircle className="h-3.5 w-3.5" />
+          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+            Add Startup
+          </span>
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add a new startup</DialogTitle>

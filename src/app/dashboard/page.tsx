@@ -114,12 +114,7 @@ export default async function Page() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button size="sm" className="h-8 gap-1">
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    <AddStartup />
-                  </span>
-                </Button>
+                <AddStartup />
               </div>
             </div>
             <TabsContent value="all">
