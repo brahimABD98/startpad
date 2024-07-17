@@ -136,9 +136,7 @@ export default async function Page() {
                           <p className="text-sm text-muted-foreground">
                             You can start selling as soon as you add a startup.
                           </p>
-                          <Button variant="outline">
                             <AddStartup />
-                          </Button>
                         </div>
                       </div>
                     </>

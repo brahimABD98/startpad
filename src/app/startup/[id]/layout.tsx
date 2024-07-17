@@ -31,6 +31,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { getStartupInfo } from "@/server/queries";
+import { DisplayServerImages } from "@/app/_components/DisplayServerImages";
 
 export default async function RootLayout({
   children,
@@ -40,14 +41,20 @@ export default async function RootLayout({
   params: { id: string };
 }) {
   const startup_info = await getStartupInfo(params.id);
+  if (!startup_info) return null;
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/" className="flex items-center gap-2 font-semibold">
-              <Package2 className="h-6 w-6" />
-              <span className="">{startup_info?.name} inc</span>
+              <DisplayServerImages
+                src={startup_info.logo}
+                width={32}
+                height={32}
+                alt={startup_info.name}
+              />
+              <span className="">{startup_info?.name} </span>
             </Link>
             <Button variant="outline" size="icon" className="ml-auto h-8 w-8">
               <Bell className="h-4 w-4" />

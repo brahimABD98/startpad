@@ -70,7 +70,7 @@ export async function getStartupInfo(id: string) {
   const userId = session?.user.id;
   if (!userId) throw Error("Unauthorized");
   return db.query.startups.findFirst({
-    where: and(eq(startups.id, Number(id)), eq(startups.founderId, userId)),
+    where: and(eq(startups.id, id), eq(startups.founderId, userId)),
   });
 }
 

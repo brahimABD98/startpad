@@ -10,6 +10,7 @@ import { DisplayAllPosts } from "@/app/_components/DisplayAllPosts";
 import { Announcements } from "@/app/_components/Announcements";
 import { StartupGallery } from "@/app/startup/StartupGallery";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DisplayServerImages } from "@/app/_components/DisplayServerImages";
 function GallerySkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -30,11 +31,11 @@ export default async function Page({ params }: { params: { id: string } }) {
       <header className="relative bg-gray-100 px-6 py-4 text-gray-900 dark:bg-gray-800 dark:text-gray-100 md:px-8 md:py-6">
         <div className="container mx-auto">
           <div className="relative h-48 w-full">
-            <Image
-              alt="Cover image"
-              className="h-[480px] w-full rounded-lg object-cover"
-              src="/placeholder.svg"
-              layout="fill"
+            <DisplayServerImages
+              src={startup_info.logo}
+              width={200}
+              height={100}
+              alt={startup_info.name}
             />
             <div className="absolute bottom-4 left-4 flex items-center space-x-2">
               <div className="overflow-hidden rounded-lg border-2 border-gray-200 dark:border-gray-700">
