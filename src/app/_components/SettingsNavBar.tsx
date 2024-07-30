@@ -6,7 +6,7 @@ import React from "react";
 export default function SettingsNavBar() {
   const pathname = usePathname();
   const links = [
-    { href: "/dashboard/settings/profile", text: "General", id: 1 },
+    { href: "/dashboard/settings/", text: "General", id: 1 },
     { href: "/dashboard/settings/security", text: "Security", id: 2 },
     { href: "#", text: "Integrations", id: 3 },
     { href: "#", text: "Support", id: 4 },

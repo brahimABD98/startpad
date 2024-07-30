@@ -30,20 +30,20 @@ const Nav = ({ logo }: { logo?: string }) => {
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <Link
-          href="#"
+          href="/dashboard"
           className="flex items-center gap-2 text-lg font-semibold md:text-base"
         >
           <Package2 className="h-6 w-6" />
           <span className="sr-only">Acme Inc</span>
         </Link>
         <Link
-          href="#"
+          href="/dashboard"
           className="text-muted-foreground transition-colors hover:text-foreground"
         >
           Dashboard
         </Link>
         <Link
-          href="/dashboard"
+          href="/startup"
           className="text-muted-foreground transition-colors hover:text-foreground"
         >
           Startup
@@ -66,14 +66,14 @@ const Nav = ({ logo }: { logo?: string }) => {
         <SheetContent side="left">
           <nav className="grid gap-6 text-lg font-medium">
             <Link
-              href="#"
+              href="/dashboard"
               className="flex items-center gap-2 text-lg font-semibold md:text-base"
             >
               <Package2 className="h-6 w-6" />
               <span className="sr-only">Acme Inc</span>
             </Link>
             <Link
-              href="#"
+              href="/dashboard"
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
               Dashboard
@@ -131,10 +131,10 @@ const Nav = ({ logo }: { logo?: string }) => {
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Link href="/dashboard/settings">
-              <Button variant="ghost">
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </Button>
+                <Button variant="ghost">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </Button>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>

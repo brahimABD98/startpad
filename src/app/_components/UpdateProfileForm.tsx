@@ -14,7 +14,7 @@ import { updateProfile } from "@/server/actions";
 import { PencilIcon } from "lucide-react";
 import React, { useRef } from "react";
 import { useFormState, useFormStatus } from "react-dom";
-  import type { SelectUser } from "@/server/db/schema";
+import type { SelectUser } from "@/server/db/schema";
 
 const initialState = {
   message: "",
@@ -27,7 +27,7 @@ function SubmitButton() {
     </Button>
   );
 }
-
+//TODO : Refactor to React Hook Form
 export default function UpdateProfileForm({ user }: { user: SelectUser }) {
   const [state, formAction] = useFormState(updateProfile, initialState);
   const inputFileRef = useRef<HTMLInputElement>(null);
