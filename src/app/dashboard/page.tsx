@@ -32,10 +32,10 @@ import { getImageURL, getUserStartups } from "@/server/queries";
 import Nav from "../_components/Nav";
 import AddStartup from "../startup/AddStartup";
 import { DisplayServerImages } from "../_components/DisplayServerImages";
-
+import { redirect } from "next/navigation";
 export default async function Page() {
   const session = await getServerAuthSession();
-  if (!session?.user) return null;
+  if (!session?.user) return redirect("/signin");
   const startups = await getUserStartups();
   const image_url = await getImageURL(session.user.image);
 

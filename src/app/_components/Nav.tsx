@@ -130,10 +130,12 @@ const Nav = ({ logo }: { logo?: string }) => {
               </Button>
             </DropdownMenuItem>
             <DropdownMenuItem>
+              <Link href="/dashboard/settings">
               <Button variant="ghost">
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
               </Button>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Button variant="ghost">
