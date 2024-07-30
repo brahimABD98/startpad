@@ -68,7 +68,7 @@ export default async function RootLayout({
                 className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
               >
                 <Home className="h-4 w-4" />
-                Profile
+                Home
               </Link>
               <Link
                 href="#"
@@ -85,7 +85,7 @@ export default async function RootLayout({
                 className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
               >
                 <Package className="h-4 w-4" />
-                Products{" "}
+                Products
               </Link>
               <Link
                 href="#"
@@ -93,13 +93,6 @@ export default async function RootLayout({
               >
                 <Users className="h-4 w-4" />
                 Customers
-              </Link>
-              <Link
-                href="#"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
-                <LineChart className="h-4 w-4" />
-                Analytics
               </Link>
             </nav>
           </div>

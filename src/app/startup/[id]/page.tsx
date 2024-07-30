@@ -1,5 +1,4 @@
 import React, { Suspense } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { TabsTrigger, TabsList, TabsContent, Tabs } from "@/components/ui/tabs";
 import { CardHeader, CardContent, Card } from "@/components/ui/card";

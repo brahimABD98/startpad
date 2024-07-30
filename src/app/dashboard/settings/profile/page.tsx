@@ -24,7 +24,6 @@ export default async function page() {
     });
     userData = { ...userData, image: url };
   }
-  console.log("data", userData);
   return (
     <>
       <div>
