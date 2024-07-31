@@ -27,7 +27,7 @@ import { signOut } from "next-auth/react";
 
 const DashboardNav = ({ logo }: { logo?: string }) => {
   return (
-    <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+    <header className="sticky top-0 flex h-16 w-full items-center gap-4 border-b bg-background px-4 md:px-6">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <Link
           href="/dashboard"
@@ -67,7 +67,7 @@ const DashboardNav = ({ logo }: { logo?: string }) => {
           <nav className="grid gap-6 text-lg font-medium">
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 text-lg font-semibold md:text-base"
+              className="flex items-center  gap-2 text-lg font-semibold md:text-base"
             >
               <Package2 className="h-6 w-6" />
               <span className="sr-only">Acme Inc</span>
@@ -89,7 +89,7 @@ const DashboardNav = ({ logo }: { logo?: string }) => {
               className="text-foreground transition-colors hover:text-foreground"
             >
               Settings
-            </Link>{" "}
+            </Link>
           </nav>
         </SheetContent>
       </Sheet>
