@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
-const Nav = ({ logo }: { logo?: string }) => {
+const DashboardNav = ({ logo }: { logo?: string }) => {
   return (
     <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -157,4 +157,4 @@ const Nav = ({ logo }: { logo?: string }) => {
   );
 };
 
-export default Nav;
+export default DashboardNav;

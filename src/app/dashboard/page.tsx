@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/tooltip";
 import { getServerAuthSession } from "@/server/auth";
 import { getImageURL, getUserStartups } from "@/server/queries";
-import Nav from "../_components/Nav";
+import DashboardNav from "../_components/DashboardNav";
 import AddStartup from "../startup/AddStartup";
 import { DisplayServerImages } from "../_components/DisplayServerImages";
 import { redirect } from "next/navigation";
@@ -87,7 +87,7 @@ export default async function Page() {
         </nav>
       </aside>
       <div className="flex h-screen flex-col   sm:gap-4 sm:py-4 sm:pl-14">
-        <Nav logo={image_url} />
+        <DashboardNav logo={image_url} />
         <main className="grid flex-1  items-start gap-4  p-4 sm:px-6 sm:py-0 md:gap-8">
           <Tabs defaultValue="all">
             <div className="flex items-center">
