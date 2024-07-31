@@ -255,5 +255,3 @@ export const conferenceSpeakersRelations = relations(
 );
 
 export const insertConferenceSchema = createInsertSchema(conferences);
-
-

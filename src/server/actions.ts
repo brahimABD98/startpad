@@ -190,7 +190,6 @@ export async function createPost(
   return { id: new_post[0]?.id };
 }
 
-
 export async function createStartup(formData: FormData) {
   console.log(formData.entries());
   const schema = z.object({
@@ -214,9 +213,12 @@ export async function createStartup(formData: FormData) {
     console.error("error parsing:", parse.error.errors);
     return { message: "Invalid form data" };
   }
-  const moderation_form_data = new FormData()
-  moderation_form_data.append("image",formData.get("logo") as Blob)
-  await fetch(`${env.MODERATION_API_URL}/image`,{method:"POST",body:moderation_form_data})
+  const moderation_form_data = new FormData();
+  moderation_form_data.append("image", formData.get("logo") as Blob);
+  await fetch(`${env.MODERATION_API_URL}/image`, {
+    method: "POST",
+    body: moderation_form_data,
+  });
   const data = parse.data;
   const { name, description, foundedAt, logo } = data;
   const new_startup = await db

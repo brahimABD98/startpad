@@ -1,4 +1,3 @@
-
 import { generateParticiaptionToken } from "@/server/actions";
 import { LiveRoom } from "@/app/_components/LiveRoom";
 export default async function Page({ params }: { params: { id: string } }) {
