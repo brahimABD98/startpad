@@ -17,21 +17,11 @@ import {
   users,
   insertConferenceSchema,
   conferences,
+  fileSchema,
+  uuidSchema,
+  insertStartupSchema,
 } from "./db/schema";
 import { CreateNewPostSchema } from "@/lib/formSchema";
-const fileSchema = z.instanceof(File).refine(
-  (file) => {
-    return (
-      file.type.startsWith("image/") &&
-      file.size > 0 &&
-      file.size < 4 * 1024 * 1024
-    );
-  },
-  {
-    message:
-      "File must be an image type and its size must be greater than 0 and less than 4 MB",
-  },
-);
 
 export async function updateProfile(
   prevState: {
@@ -126,7 +116,7 @@ export async function deleteProfile() {
   revalidatePath("/dashboard/settings/profile");
   redirect("/");
 }
-const uuidSchema = z.string().uuid();
+
 export async function createConfernence(
   formData: z.infer<typeof insertConferenceSchema>,
 ) {
@@ -190,42 +180,43 @@ export async function createPost(
   return { id: new_post[0]?.id };
 }
 
-export async function createStartup(formData: FormData) {
-  console.log(formData.entries());
-  const schema = z.object({
-    name: z.string(),
-    description: z.string(),
-    foundedAt: z
-      .string()
-      .refine((date) => new Date(date).toISOString() !== "Invalid Date")
-      .default(() => new Date().toISOString()),
-    logo: fileSchema.optional(),
-  });
+export async function createStartup(
+  formData: z.infer<typeof insertStartupSchema>,
+) {
   const session = await getServerAuthSession();
+
   if (!session) return { message: "Unauthorized" };
-  const parse = schema.safeParse({
-    name: formData.get("name"),
-    description: formData.get("description"),
-    foundedAt: formData.get("foundedAt"),
-    logo: formData.get("logo"),
+
+  console.log("session", formData);
+
+  const parse = insertStartupSchema.safeParse({
+    name: formData.name,
+    description: formData.description,
+    foundedAt: formData.foundedAt,
+    logo: formData.logo,
+    founderId: session.user.id,
   });
+
   if (!parse.success) {
     console.error("error parsing:", parse.error.errors);
     return { message: "Invalid form data" };
   }
+
+  const { name, description, foundedAt, logo } = parse.data;
   const moderation_form_data = new FormData();
-  moderation_form_data.append("image", formData.get("logo") as Blob);
-  await fetch(`${env.MODERATION_API_URL}/image`, {
-    method: "POST",
-    body: moderation_form_data,
-  });
-  const data = parse.data;
-  const { name, description, foundedAt, logo } = data;
+
+  moderation_form_data.append("image", logo as Blob);
+
+  // await fetch(`${env.MODERATION_API_URL}/image`, {
+  //   method: "POST",
+  //   body: moderation_form_data,
+  // });
+
   const new_startup = await db
     .insert(startups)
     .values({
-      name: name,
-      description: description,
+      name,
+      description,
       foundedAt: new Date(foundedAt),
       logo: logo?.name ?? "default.png",
       founderId: session.user.id,

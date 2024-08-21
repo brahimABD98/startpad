@@ -1,17 +1,40 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogHeader } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import {
   DialogContent,
   DialogDescription,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import type { z } from "zod";
 import React from "react";
 import { Input } from "@/components/ui/input";
 import { createStartup } from "@/server/actions";
 import { PlusCircle } from "lucide-react";
+import { type SubmitHandler, useForm } from "react-hook-form";
+import { insertStartupSchema } from "@/server/db/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
 export default function AddStartup() {
+  type Inputs = z.infer<typeof insertStartupSchema>;
+  const form = useForm<Inputs>({
+    resolver: zodResolver(insertStartupSchema),
+  });
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    console.log("errors:", form.formState.isValid);
+    console.log(data);
+    // await createStartup(data);
+  };
+  const onInvalid = (errors) => console.error(errors);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -27,34 +50,84 @@ export default function AddStartup() {
           <DialogTitle>Add a new startup</DialogTitle>
           <DialogDescription>you can add a new startup here.</DialogDescription>
         </DialogHeader>
-        <form action={createStartup}>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="name" className="mt-4">
-              Name
-            </Label>
-            <Input
-              required
-              type="text"
-              name="name"
-              placeholder="pick a startup name"
-            />
-            <Label htmlFor="description" className="mt-4">
-              Description
-            </Label>
-            <Input
-              type="text"
-              id="description"
-              required
-              name="description"
-              placeholder="write a breif description about your startup"
-            />
-            <Input type="date" required id="foundedAt" name="foundedAt" />
-            <Input type="file" required id="logo" name="logo" />
-          </div>
-          <div className="pt-2">
-            <Button type="submit">submit</Button>
-          </div>
-        </form>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+            <div className="flex flex-col gap-2">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="name" className="mt-4">
+                      Name
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="text"
+                        name="name"
+                        placeholder="pick a startup name"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="description" className="mt-4">
+                      Description
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="text"
+                        id="description"
+                        name="description"
+                        placeholder="write a breif description about your startup"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="foundedAt"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="date"
+                        id="foundedAt"
+                        name="foundedAt"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Input
+                onChange={(e) => {
+                  if (e.target.files?.[0])
+                    form.setValue("logo", e.target.files[0]);
+                }}
+                type="file"
+                id="logo"
+                name="logo"
+              />
+            </div>
+            <div className="pt-2">
+              <Button type="submit">submit</Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

@@ -13,6 +13,7 @@ import { type AdapterAccount } from "next-auth/adapters";
 import { createInsertSchema } from "drizzle-zod";
 import { customAlphabet } from "nanoid";
 import { generateConferenceId } from "@/lib/utils";
+import { z } from "zod";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -116,6 +117,7 @@ export const files = createTable("file", {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   size: integer("size").notNull(),
+  moderation_id: varchar("moderation_id", { length: 42 }),
 });
 
 export const users = createTable("user", {
@@ -254,4 +256,28 @@ export const conferenceSpeakersRelations = relations(
   }),
 );
 
+//zod
+export const fileSchema = z.instanceof(File).refine(
+  (file) => {
+    if (!file || !(file instanceof File)) return true;
+    return (
+      file.type.startsWith("image/") &&
+      file.size > 0 &&
+      file.size < 4 * 1024 * 1024
+    );
+  },
+  {
+    message:
+      "File must be an image type and its size must be greater than 0 and less than 4 MB",
+  },
+);
+
+export const insertStartupSchema = createInsertSchema(startups, {
+  logo: fileSchema.optional(),
+  foundedAt: z
+    .string()
+    .refine((date) => new Date(date).toISOString() !== "Invalid Date")
+    .default(() => new Date().toISOString()),
+}).omit({ founderId: true });
 export const insertConferenceSchema = createInsertSchema(conferences);
+export const uuidSchema = z.string().uuid();
