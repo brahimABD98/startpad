@@ -19,4 +19,3 @@ export async function StartupGallery({ startup }: { startup: SelectStartups }) {
     </div>
   );
 }
-

@@ -42,8 +42,6 @@ export async function getUserWithStartups() {
   5;
 }
 export async function getImageURL(image: string | null | undefined) {
-  //add 4 sec latency
-  await new Promise((res) => setTimeout(res, 10000));
   if (!image) return;
   return isValidURL(image)
     ? image
@@ -72,7 +70,7 @@ export async function getStartupInfo(id: string) {
   const userId = session?.user.id;
   if (!userId) throw Error("Unauthorized");
   return db.query.startups.findFirst({
-    where: and(eq(startups.id, Number(id)), eq(startups.founderId, userId)),
+    where: and(eq(startups.id, id), eq(startups.founderId, userId)),
   });
 }
 
@@ -93,8 +91,6 @@ export const getStartupAnnouncements = async (startup: SelectStartups) => {
 };
 
 export async function getStartupImages(posts: SelectPosts[]) {
-  // add 10 sec delay
-  await new Promise((res) => setTimeout(res, 10000));
   return db.query.postimages.findMany({
     where: inArray(
       postimages.postId,
@@ -103,5 +99,11 @@ export async function getStartupImages(posts: SelectPosts[]) {
     with: {
       file: true,
     },
+  });
+}
+
+export async function getLatestConferences() {
+  return await db.query.conferences.findMany({
+    orderBy: (model, { desc }) => [desc(model.startDate)],
   });
 }

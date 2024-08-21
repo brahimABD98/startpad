@@ -5,12 +5,15 @@ import {
   integer,
   pgTableCreator,
   primaryKey,
-  serial,
   text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
+import { createInsertSchema } from "drizzle-zod";
+import { customAlphabet } from "nanoid";
+import { generateConferenceId } from "@/lib/utils";
+import { z } from "zod";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -20,15 +23,46 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `startpad_${name}`);
 
+const nanoid = customAlphabet("abcdefghijklmnpqrstuvwxyz0123456789", 14);
+
+export const conferences = createTable("conferences", {
+  id: varchar("id", { length: 255 })
+    .notNull()
+    .primaryKey()
+    .$defaultFn(() => generateConferenceId()),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  startDate: timestamp("startDate", { mode: "string" }).notNull(),
+  createdBy: varchar("createdBy")
+    .references(() => startups.id)
+    .notNull(),
+});
+
+export const conferenceSpeakers = createTable(
+  "conference_speakers",
+  {
+    conferenceId: varchar("conferenceId", { length: 255 })
+      .references(() => conferences.id)
+      .notNull(),
+    speakerId: varchar("speakerId", { length: 255 })
+      .references(() => users.id)
+      .notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.speakerId, table.conferenceId] }),
+  }),
+);
 export const posts = createTable(
   "post",
   {
-    id: serial("id").primaryKey(),
+    id: varchar("id")
+      .primaryKey()
+      .$defaultFn(() => nanoid()),
     title: varchar("title", { length: 256 }),
     createdByUser: varchar("createdById", { length: 255 }).references(
       () => users.id,
     ),
-    createdByStartup: integer("createdByStartup").references(() => startups.id),
+    createdByStartup: varchar("createdByStartup").references(() => startups.id),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -46,8 +80,12 @@ export const posts = createTable(
 export const postimages = createTable(
   "post_images",
   {
-    postId: integer("postId").references(() => posts.id),
-    fileId: integer("file").references(() => files.id),
+    postId: varchar("postId")
+      .references(() => posts.id)
+      .notNull(),
+    fileId: varchar("file")
+      .references(() => files.id)
+      .notNull(),
     uploadedAt: timestamp("uploadedAt"),
   },
   (table) => ({
@@ -56,7 +94,9 @@ export const postimages = createTable(
 );
 
 export const startups = createTable("startup", {
-  id: serial("id").primaryKey(),
+  id: varchar("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description").notNull(),
   foundedAt: timestamp("foundedAt", { mode: "date" }).notNull(),
@@ -67,7 +107,9 @@ export const startups = createTable("startup", {
 });
 
 export const files = createTable("file", {
-  id: serial("id").primaryKey(),
+  id: varchar("id")
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
   fileName: varchar("fileName", { length: 255 }).notNull(),
   bucket: varchar("bucket", { length: 255 }).notNull(),
   originalName: varchar("originalName", { length: 255 }).notNull(),
@@ -75,6 +117,7 @@ export const files = createTable("file", {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
   size: integer("size").notNull(),
+  moderation_id: varchar("moderation_id", { length: 42 }),
 });
 
 export const users = createTable("user", {
@@ -101,7 +144,7 @@ export const accounts = createTable(
     providerAccountId: varchar("providerAccountId", { length: 255 }).notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
-    expires_at: integer("expires_at"),
+    expires_at: varchar("expires_at"),
     token_type: varchar("token_type", { length: 255 }),
     scope: varchar("scope", { length: 255 }),
     id_token: text("id_token"),
@@ -179,6 +222,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
   startups: many(startups),
   posts: many(posts),
+  conferenceSpeakers: many(conferenceSpeakers),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -193,3 +237,47 @@ export const postImagesRelations = relations(postimages, ({ one }) => ({
   post: one(posts, { fields: [postimages.postId], references: [posts.id] }),
   file: one(files, { fields: [postimages.fileId], references: [files.id] }),
 }));
+
+export const conferenceRelations = relations(conferences, ({ many }) => ({
+  conferencespeakers: many(conferenceSpeakers),
+}));
+
+export const conferenceSpeakersRelations = relations(
+  conferenceSpeakers,
+  ({ one }) => ({
+    conference: one(conferences, {
+      fields: [conferenceSpeakers.conferenceId],
+      references: [conferences.id],
+    }),
+    speaker: one(users, {
+      fields: [conferenceSpeakers.speakerId],
+      references: [users.id],
+    }),
+  }),
+);
+
+//zod
+export const fileSchema = z.instanceof(File).refine(
+  (file) => {
+    if (!file || !(file instanceof File)) return true;
+    return (
+      file.type.startsWith("image/") &&
+      file.size > 0 &&
+      file.size < 4 * 1024 * 1024
+    );
+  },
+  {
+    message:
+      "File must be an image type and its size must be greater than 0 and less than 4 MB",
+  },
+);
+
+export const insertStartupSchema = createInsertSchema(startups, {
+  logo: fileSchema.optional(),
+  foundedAt: z
+    .string()
+    .refine((date) => new Date(date).toISOString() !== "Invalid Date")
+    .default(() => new Date().toISOString()),
+}).omit({ founderId: true });
+export const insertConferenceSchema = createInsertSchema(conferences);
+export const uuidSchema = z.string().uuid();

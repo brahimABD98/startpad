@@ -1,4 +1,3 @@
-"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -7,8 +6,11 @@ import { Label } from "@/components/ui/label";
 import DiscordAuthButton from "@/app/_components/discord-auth-button";
 import GoogleSignInButton from "@/app/_components/GoogleSignInButton";
 import GithubSignInButton from "@/app/_components/GithubSignInButton";
-
-export default function Signin() {
+import { getServerAuthSession } from "@/server/auth";
+import { redirect } from "next/navigation";
+export default async function page() {
+  const session = await getServerAuthSession();
+  if (session) return redirect("/dashboard");
   return (
     <div className="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-[800px]">
       <div className="flex items-center justify-center py-12">

@@ -11,6 +11,9 @@ const config = {
       {
         hostname: "localhost",
       },
+      {
+        hostname: "lh3.googleusercontent.com",
+      },
     ],
   },
 };

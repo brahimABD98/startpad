@@ -28,24 +28,31 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { getServerAuthSession } from "@/server/auth";
-import { getUserStartups } from "@/server/queries";
-import Nav from "../_components/Nav";
+import { getImageURL, getUserStartups } from "@/server/queries";
+import DashboardNav from "../_components/DashboardNav";
 import AddStartup from "../startup/AddStartup";
-
+import { DisplayServerImages } from "../_components/DisplayServerImages";
+import { redirect } from "next/navigation";
 export default async function Page() {
   const session = await getServerAuthSession();
-  if (!session?.user) return null;
+  if (!session?.user) return redirect("/signin");
   const startups = await getUserStartups();
+  const image_url = await getImageURL(session.user.image);
+
   return (
     <div className="flex min-h-screen w-full flex-col  bg-muted/40">
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
         <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
           <Link
-            href="#"
+            href="/dashboard"
             className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
           >
-            <Package2 className="h-4 w-4 transition-all group-hover:scale-110" />
-            <span className="">{session?.user.name} </span>
+            <DisplayServerImages
+              width={48}
+              height={48}
+              alt={`${session.user.name}`}
+              src={session.user.image}
+            />
           </Link>
           <TooltipProvider>
             <Tooltip>
@@ -80,7 +87,7 @@ export default async function Page() {
         </nav>
       </aside>
       <div className="flex h-screen flex-col   sm:gap-4 sm:py-4 sm:pl-14">
-        <Nav />
+        <DashboardNav logo={image_url} />
         <main className="grid flex-1  items-start gap-4  p-4 sm:px-6 sm:py-0 md:gap-8">
           <Tabs defaultValue="all">
             <div className="flex items-center">
@@ -107,12 +114,7 @@ export default async function Page() {
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button size="sm" className="h-8 gap-1">
-                  <PlusCircle className="h-3.5 w-3.5" />
-                  <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                    Add Startup
-                  </span>
-                </Button>
+                <AddStartup />
               </div>
             </div>
             <TabsContent value="all">
@@ -143,16 +145,11 @@ export default async function Page() {
                     <>
                       <Card key={startup.id} className="lg:w-1/4">
                         <CardHeader className="flex flex-row items-center gap-4 p-4">
-                          <Image
-                            alt="Thumbnail"
-                            className="rounded"
-                            height="48"
-                            src="/placeholder.svg"
-                            style={{
-                              aspectRatio: "48/48",
-                              objectFit: "cover",
-                            }}
-                            width="48"
+                          <DisplayServerImages
+                            height={48}
+                            width={48}
+                            src={startup.logo}
+                            alt={`${startup.name}`}
                           />
                           <div className="grid gap-1">
                             <CardTitle>{startup.name ?? "example"}</CardTitle>
@@ -162,7 +159,7 @@ export default async function Page() {
                           </div>
                           <Link
                             className="ml-auto"
-                            href={`/dashboard/startup/${startup?.id}`}
+                            href={`/startup/${startup?.id}`}
                           >
                             <Button size="sm">Select</Button>
                           </Link>

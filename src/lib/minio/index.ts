@@ -24,7 +24,7 @@ export async function saveFileInBucket({
   bucketName: string;
   fileName: string;
   file: Buffer;
-    }) {
+}) {
   await createBucketIfNotExists(bucketName);
   const fileExists = await checkfileExistsInBucket({
     bucketName,

@@ -1,28 +1,27 @@
 "use server";
 import { v4 as uuidv4 } from "uuid";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { getServerAuthSession } from "./auth";
 import { db } from "./db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { saveFileInBucket } from "../lib/minio";
+import { AccessToken } from "livekit-server-sdk";
+import { env } from "@/env";
 import { File } from "buffer";
-import { files, posts, startups, users } from "./db/schema";
+import {
+  files,
+  posts,
+  startups,
+  users,
+  insertConferenceSchema,
+  conferences,
+  fileSchema,
+  uuidSchema,
+  insertStartupSchema,
+} from "./db/schema";
 import { CreateNewPostSchema } from "@/lib/formSchema";
-const fileSchema = z.instanceof(File).refine(
-  (file) => {
-    return (
-      file.type.startsWith("image/") &&
-      file.size > 0 &&
-      file.size < 4 * 1024 * 1024
-    );
-  },
-  {
-    message:
-      "File must be an image type and its size must be greater than 0 and less than 4 MB",
-  },
-);
 
 export async function updateProfile(
   prevState: {
@@ -117,7 +116,36 @@ export async function deleteProfile() {
   revalidatePath("/dashboard/settings/profile");
   redirect("/");
 }
-const uuidSchema = z.string().uuid();
+
+export async function createConfernence(
+  formData: z.infer<typeof insertConferenceSchema>,
+) {
+  const data = insertConferenceSchema.parse(formData);
+  if (!data) throw new Error("Invalid data");
+
+  const session = await getServerAuthSession();
+  if (!session) return { message: "Unauthorized" };
+
+  // check if data.createdby is in users.startups
+  const startup = await db.query.startups.findFirst({
+    where: and(
+      eq(startups.id, data.createdBy),
+      eq(startups.founderId, session?.user.id),
+    ),
+  });
+  if (!startup) return { message: "Unauthorized" };
+
+  const new_conference = await db
+    .insert(conferences)
+    .values({
+      startDate: data.startDate,
+      name: data.name,
+      description: data.description,
+      createdBy: startup.id,
+    })
+    .returning({ id: conferences.id });
+  redirect(`/conference/${new_conference[0]?.id}`);
+}
 export async function createPost(
   formData: z.infer<typeof CreateNewPostSchema>,
 ) {
@@ -144,7 +172,7 @@ export async function createPost(
       content: data.postContent,
       title: data.title,
       is_pinned: data.markpinned,
-      createdByStartup: parseInt(data.author_id),
+      createdByStartup: data.author_id,
     })
     .returning({ id: posts.id });
   revalidatePath("/dashboard/startup/[id]", "page");
@@ -152,36 +180,43 @@ export async function createPost(
   return { id: new_post[0]?.id };
 }
 
-export async function createStartup(formData: FormData) {
-  console.log(formData.entries());
-  const schema = z.object({
-    name: z.string(),
-    description: z.string(),
-    foundedAt: z
-      .string()
-      .refine((date) => new Date(date).toISOString() !== "Invalid Date")
-      .default(() => new Date().toISOString()),
-    logo: fileSchema.optional(),
-  });
+export async function createStartup(
+  formData: z.infer<typeof insertStartupSchema>,
+) {
   const session = await getServerAuthSession();
+
   if (!session) return { message: "Unauthorized" };
-  const parse = schema.safeParse({
-    name: formData.get("name"),
-    description: formData.get("description"),
-    foundedAt: formData.get("foundedAt"),
-    logo: formData.get("logo"),
+
+  console.log("session", formData);
+
+  const parse = insertStartupSchema.safeParse({
+    name: formData.name,
+    description: formData.description,
+    foundedAt: formData.foundedAt,
+    logo: formData.logo,
+    founderId: session.user.id,
   });
+
   if (!parse.success) {
     console.error("error parsing:", parse.error.errors);
     return { message: "Invalid form data" };
   }
-  const data = parse.data;
-  const { name, description, foundedAt, logo } = data;
+
+  const { name, description, foundedAt, logo } = parse.data;
+  const moderation_form_data = new FormData();
+
+  moderation_form_data.append("image", logo as Blob);
+
+  // await fetch(`${env.MODERATION_API_URL}/image`, {
+  //   method: "POST",
+  //   body: moderation_form_data,
+  // });
+
   const new_startup = await db
     .insert(startups)
     .values({
-      name: name,
-      description: description,
+      name,
+      description,
       foundedAt: new Date(foundedAt),
       logo: logo?.name ?? "default.png",
       founderId: session.user.id,
@@ -193,4 +228,19 @@ export async function createStartup(formData: FormData) {
     });
   revalidatePath(`/dashboard/startups`);
   redirect(`/dashboard/startup/${new_startup[0]?.id}`);
+}
+
+export async function generateParticiaptionToken(roomid: string) {
+  const session = await getServerAuthSession();
+  if (!session) throw new Error("Unauthorized");
+  const room = await db.query.conferences.findFirst({
+    where: eq(conferences.id, roomid),
+  });
+  if (!room) throw new Error("Room not found");
+  const token = new AccessToken(env.LIVEKIT_API_KEY, env.LIVEKIT_API_SECRET, {
+    identity: session.user.id,
+    ttl: "20m",
+  });
+  token.addGrant({ roomJoin: true, room: roomid });
+  return await token.toJwt();
 }
