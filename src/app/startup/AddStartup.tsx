@@ -33,7 +33,6 @@ export default function AddStartup() {
     console.log(data);
     // await createStartup(data);
   };
-  const onInvalid = (errors) => console.error(errors);
 
   return (
     <Dialog>
@@ -51,7 +50,7 @@ export default function AddStartup() {
           <DialogDescription>you can add a new startup here.</DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit, onInvalid)}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-2">
               <FormField
                 control={form.control}
