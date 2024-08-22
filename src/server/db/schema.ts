@@ -272,6 +272,7 @@ export const fileSchema = z.instanceof(File).refine(
   },
 );
 
+
 export const insertStartupSchema = createInsertSchema(startups, {
   logo: fileSchema.optional(),
   foundedAt: z

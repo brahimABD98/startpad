@@ -29,9 +29,13 @@ export default function AddStartup() {
     resolver: zodResolver(insertStartupSchema),
   });
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log("errors:", form.formState.isValid);
-    console.log(data);
-    // await createStartup(data);
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("description", data.description);
+    formData.append("foundedAt", data.foundedAt);
+    formData.append("logo", data.logo as Blob);
+
+    await createStartup(data);
   };
 
   return (
