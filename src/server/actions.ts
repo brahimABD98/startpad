@@ -9,7 +9,6 @@ import { redirect } from "next/navigation";
 import { saveFileInBucket } from "../lib/minio";
 import { AccessToken } from "livekit-server-sdk";
 import { env } from "@/env";
-import { File } from "buffer";
 import {
   files,
   posts,
@@ -22,7 +21,6 @@ import {
   insertStartupSchema,
 } from "./db/schema";
 import { CreateNewPostSchema } from "@/lib/formSchema";
-import { createAPIFormMethod } from "@/lib/utils";
 import { image_moderation_request } from "./queries";
 import { nanoid } from "nanoid";
 
