@@ -35,7 +35,7 @@ export default function AddStartup() {
     formData.append("foundedAt", data.foundedAt);
     formData.append("logo", data.logo as Blob);
 
-    await createStartup(data);
+    await createStartup(formData);
   };
 
   return (

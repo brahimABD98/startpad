@@ -1,8 +1,9 @@
 import "server-only";
 import { db } from "./db";
-import { isValidURL } from "@/lib/utils";
+import { createAPIFormMethod, isValidURL } from "@/lib/utils";
 import { getServerAuthSession } from "./auth";
 import { eq, and, or, inArray } from "drizzle-orm";
+import { env } from "@/env";
 import { startups, posts, postimages } from "./db/schema";
 import type { SelectPosts, SelectStartups } from "./db/schema";
 import { createPresignedUrlToDownload } from "@/lib/minio";
@@ -107,3 +108,10 @@ export async function getLatestConferences() {
     orderBy: (model, { desc }) => [desc(model.startDate)],
   });
 }
+export const image_moderation_request = createAPIFormMethod<{
+  task_id: string;
+  created_at: string;
+}>({
+  url: `${env.MODERATION_API_URL}/image`,
+  method: "POST",
+});

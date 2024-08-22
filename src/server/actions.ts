@@ -22,6 +22,9 @@ import {
   insertStartupSchema,
 } from "./db/schema";
 import { CreateNewPostSchema } from "@/lib/formSchema";
+import { createAPIFormMethod } from "@/lib/utils";
+import { image_moderation_request } from "./queries";
+import { nanoid } from "nanoid";
 
 export async function updateProfile(
   prevState: {
@@ -180,9 +183,7 @@ export async function createPost(
   return { id: new_post[0]?.id };
 }
 
-export async function createStartup(
-  formData: z.infer<typeof insertStartupSchema>,
-) {
+export async function createStartup(formData: FormData) {
   const session = await getServerAuthSession();
 
   if (!session) return { message: "Unauthorized" };
@@ -190,10 +191,10 @@ export async function createStartup(
   console.log("session", formData);
 
   const parse = insertStartupSchema.safeParse({
-    name: formData.name,
-    description: formData.description,
-    foundedAt: formData.foundedAt,
-    logo: formData.logo,
+    name: formData.get("name"),
+    description: formData.get("description"),
+    foundedAt: formData.get("foundedAt"),
+    logo: formData.get("logo"),
     founderId: session.user.id,
   });
 
@@ -203,22 +204,14 @@ export async function createStartup(
   }
 
   const { name, description, foundedAt, logo } = parse.data;
-  const moderation_form_data = new FormData();
-
-  moderation_form_data.append("image", logo as Blob);
-
-  // await fetch(`${env.MODERATION_API_URL}/image`, {
-  //   method: "POST",
-  //   body: moderation_form_data,
-  // });
-
+  const file = await fileUpload(logo);
   const new_startup = await db
     .insert(startups)
     .values({
       name,
       description,
       foundedAt: new Date(foundedAt),
-      logo: logo?.name ?? "default.png",
+      logo: file,
       founderId: session.user.id,
     })
     .returning({ id: startups.id })
@@ -226,8 +219,8 @@ export async function createStartup(
       console.error(e);
       return [];
     });
-  revalidatePath(`/dashboard/startups`);
-  redirect(`/dashboard/startup/${new_startup[0]?.id}`);
+  revalidatePath(`/dashboard/`);
+  redirect(`/startup/${new_startup[0]?.id}`);
 }
 
 export async function generateParticiaptionToken(roomid: string) {
@@ -243,4 +236,33 @@ export async function generateParticiaptionToken(roomid: string) {
   });
   token.addGrant({ roomJoin: true, room: roomid });
   return await token.toJwt();
+}
+
+export async function fileUpload(data: globalThis.File | undefined) {
+  if (!data) throw new Error("No file provided");
+  data.type;
+  const moderation_form_data = new FormData();
+  moderation_form_data.append("image", data as Blob);
+
+  const moderation = await image_moderation_request(moderation_form_data);
+  console.log(moderation.task_id);
+  const id = nanoid();
+  const filename = `${id}.${data.type.split("/")[1]}`;
+
+  const file = Buffer.from(await data.arrayBuffer());
+
+  await saveFileInBucket({
+    bucketName: "startpad",
+    fileName: filename,
+    file,
+  });
+
+  await db.insert(files).values({
+    originalName: data.name,
+    fileName: filename,
+    size: data.size,
+    bucket: "startpad",
+    moderation_id: moderation.task_id,
+  });
+  return filename;
 }
