@@ -92,6 +92,7 @@ export const getStartupAnnouncements = async (startup: SelectStartups) => {
 };
 
 export async function getStartupImages(posts: SelectPosts[]) {
+  if (!posts.length) return [];
   return db.query.postimages.findMany({
     where: inArray(
       postimages.postId,
