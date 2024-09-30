@@ -58,11 +58,9 @@ export const posts = createTable(
     id: varchar("id")
       .primaryKey()
       .$defaultFn(() => nanoid()),
-    title: varchar("title", { length: 256 }),
-    createdByUser: varchar("createdById", { length: 255 }).references(
-      () => users.id,
-    ),
-    createdByStartup: varchar("createdByStartup").references(() => startups.id),
+    title: varchar("title", { length: 256 }).notNull(),
+    user_id: varchar("user_id", { length: 255 }).references(() => users.id),
+    startup_id: varchar("startup_id").references(() => startups.id),
     createdAt: timestamp("created_at")
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
@@ -71,8 +69,8 @@ export const posts = createTable(
     content: text("content").notNull(),
   },
   (example) => ({
-    createdByIdIdx: index("createdById_idx").on(example.createdByUser),
-    createdBySidIdx: index("createdByStartup_idx").on(example.createdByStartup),
+    createdByIdIdx: index("createdById_idx").on(example.user_id),
+    createdBySidIdx: index("createdByStartup_idx").on(example.startup_id),
     nameIndex: index("name_idx").on(example.title),
   }),
 );
@@ -200,12 +198,12 @@ export type UserWithStartups = SelectUser & {
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
   createdByUser: one(users, {
-    fields: [posts.createdByUser],
+    fields: [posts.user_id],
     references: [users.id],
   }),
   postImages: many(postimages),
   createdByStartup: one(startups, {
-    fields: [posts.createdByStartup],
+    fields: [posts.startup_id],
     references: [startups.id],
   }),
 }));
@@ -272,7 +270,6 @@ export const fileSchema = z.instanceof(File).refine(
   },
 );
 
-
 export const insertStartupSchema = createInsertSchema(startups, {
   logo: fileSchema.optional(),
   foundedAt: z
@@ -282,3 +279,18 @@ export const insertStartupSchema = createInsertSchema(startups, {
 }).omit({ founderId: true });
 export const insertConferenceSchema = createInsertSchema(conferences);
 export const uuidSchema = z.string().uuid();
+
+export const insertPostSchema = createInsertSchema(posts, {
+  content: z.string().refine(
+    (content) => {
+      const regex = /(<([^>]+)>)/gi;
+      const clean_content = content.replace(regex, "");
+      return !!clean_content.trim().length;
+    },
+    { message: "Post content cannot be empty" },
+  ),
+})
+  .omit({ user_id: true })
+  .extend({
+    media: fileSchema.optional(),
+  });

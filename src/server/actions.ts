@@ -19,9 +19,10 @@ import {
   fileSchema,
   uuidSchema,
   insertStartupSchema,
+  insertPostSchema,
 } from "./db/schema";
 import { CreateNewPostSchema } from "@/lib/formSchema";
-import { image_moderation_request } from "./queries";
+import { getUserStartups, image_moderation_request } from "./queries";
 import { nanoid } from "nanoid";
 
 export async function updateProfile(
@@ -57,7 +58,7 @@ export async function updateProfile(
   const new_file = {
     id: file_id,
     originalName: data.image?.name ?? "default.png",
-    fileName: `${file_id}.${data.image?.type.split("/")[1]}` ?? "default.png",
+    fileName: `${file_id}.${data.image?.type.split("/")[1]}`,
     size: data.image?.size ?? 0,
     bucket: "startpad",
   };
@@ -98,8 +99,8 @@ export async function updateProfile(
   } catch (error) {
     return { message: "Error updating profile" };
   }
-  revalidatePath("/dashboard/settings/profile");
-  redirect("/dashboard/settings/profile");
+  revalidatePath("/dashboard/settings");
+  redirect("/dashboard/settings/");
 }
 export async function deleteProfile() {
   const session = await getServerAuthSession();
@@ -114,7 +115,7 @@ export async function deleteProfile() {
   } catch (error) {
     return { message: "Error deleting profile" };
   }
-  revalidatePath("/dashboard/settings/profile");
+  revalidatePath("/dashboard/settings");
   redirect("/");
 }
 
@@ -147,33 +148,19 @@ export async function createConfernence(
     .returning({ id: conferences.id });
   redirect(`/conference/${new_conference[0]?.id}`);
 }
-export async function createPost(
-  formData: z.infer<typeof CreateNewPostSchema>,
-) {
-  const data = CreateNewPostSchema.parse(formData);
+export async function createPost(formData: z.infer<typeof insertPostSchema>) {
+  const startups = getUserStartups();
+  const data = insertPostSchema.parse(formData);
 
   if (!data) throw new Error("Invalid form data");
-  const { data: uuid } = uuidSchema.safeParse(data.author_id);
-  if (uuid) {
-    const new_post = await db
-      .insert(posts)
-      .values({
-        title: data.title,
-        createdByUser: uuid,
-        content: data.postContent,
-        is_pinned: data.markpinned,
-      })
-      .returning({ id: posts.id });
-    revalidatePath("/dashboard/startup/[id]", "page");
-    return { id: new_post[0]?.id };
-  }
+
   const new_post = await db
     .insert(posts)
     .values({
-      content: data.postContent,
+      content: data.content,
       title: data.title,
-      is_pinned: data.markpinned,
-      createdByStartup: data.author_id,
+      is_pinned: data.is_pinned,
+      startup_id: data.startup_id,
     })
     .returning({ id: posts.id });
   revalidatePath("/dashboard/startup/[id]", "page");
@@ -243,7 +230,6 @@ export async function fileUpload(data: globalThis.File | undefined) {
   moderation_form_data.append("image", data as Blob);
 
   const moderation = await image_moderation_request(moderation_form_data);
-  console.log(moderation.task_id);
   const id = nanoid();
   const filename = `${id}.${data.type.split("/")[1]}`;
 
@@ -260,7 +246,7 @@ export async function fileUpload(data: globalThis.File | undefined) {
     fileName: filename,
     size: data.size,
     bucket: "startpad",
-    moderation_id: moderation.task_id,
+    moderation_id: moderation?.task_id ?? "",
   });
   return filename;
 }

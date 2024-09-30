@@ -23,7 +23,6 @@ export default async function Page({ params }: { params: { id: string } }) {
   const startup_info = await getStartupInfo(params.id);
   if (!startup_info) return null;
   const user = await getUserWithStartups();
-  if (!user) return null;
   const is_owner = startup_info?.founderId === user?.id;
   return (
     <div className="flex min-h-screen flex-col">
@@ -31,10 +30,10 @@ export default async function Page({ params }: { params: { id: string } }) {
         <div className="container mx-auto">
           <div className="relative h-48 w-full">
             <DisplayServerImages
-              src={startup_info.logo}
+              src={startup_info?.logo}
               width={200}
               height={100}
-              alt={startup_info.name}
+              alt={startup_info?.name}
             />
             <div className="absolute bottom-4 left-4 flex items-center space-x-2">
               <div className="overflow-hidden rounded-lg border-2 border-gray-200 dark:border-gray-700">
@@ -57,7 +56,7 @@ export default async function Page({ params }: { params: { id: string } }) {
               <TabsTrigger value="gallery">Gallery</TabsTrigger>
             </TabsList>
             <TabsContent className="mt-8" value="all-posts">
-              {is_owner && <CreateNewPost user={user} />}
+              {is_owner && <CreateNewPost startup_id={startup_info?.id} />}
 
               <Card className="mt-8">
                 <CardHeader>

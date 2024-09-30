@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getServerAuthSession } from "@/server/auth";
 import {
   ArrowRight,
   CheckCircle,
@@ -9,44 +10,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
-
-function Header() {
-  return (
-    <header className="flex h-14 items-center px-4 lg:px-6">
-      <Link className="flex items-center justify-center" href="#">
-        <Rocket className="mr-2 h-6 w-6" />
-        <span className="font-bold">Startpad</span>
-      </Link>
-      <nav className="ml-auto flex gap-4 sm:gap-6">
-        <Link
-          className="text-sm font-medium underline-offset-4 hover:underline"
-          href="#"
-        >
-          Program
-        </Link>
-        <Link
-          className="text-sm font-medium underline-offset-4 hover:underline"
-          href="#"
-        >
-          Portfolio
-        </Link>
-        <Link
-          className="text-sm font-medium underline-offset-4 hover:underline"
-          href="#"
-        >
-          About
-        </Link>
-        <Link
-          className="text-sm font-medium underline-offset-4 hover:underline"
-          href="#"
-        >
-          Apply
-        </Link>
-      </nav>
-    </header>
-  );
-}
-
+import { Header } from "@/app/_components/Header";
 function HeroSection() {
   return (
     <section className="w-full  bg-primary py-12 text-secondary  md:py-24 lg:py-32 xl:py-48">
@@ -63,10 +27,10 @@ function HeroSection() {
           </div>
           <div className="space-x-4">
             <Button className="  bg-secondary text-primary hover:bg-slate-200">
-              Apply Now
+              <Link href="/signin">Apply Now</Link>
             </Button>
             <Button className="bg-secondary text-primary hover:bg-slate-200">
-              Learn More
+              <Link href="/learn">Learn More</Link>
             </Button>
           </div>
         </div>

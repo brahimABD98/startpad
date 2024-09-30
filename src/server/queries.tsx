@@ -10,7 +10,7 @@ import { createPresignedUrlToDownload } from "@/lib/minio";
 export async function getUserStartups() {
   const session = await getServerAuthSession();
   const userId = session?.user.id;
-  if (!userId) throw Error("Unauthorized");
+  if (!userId) return null;
   const startups = db.query.startups.findMany({
     where: (model, { eq }) => eq(model.founderId, userId),
   });
@@ -22,7 +22,7 @@ export async function getUserData() {
   const session = await getServerAuthSession();
 
   const user = session?.user;
-  if (!user) throw Error("Unauthorized");
+  if (!user) return null;
 
   const userdata = db.query.users.findFirst({
     where: (model, { eq }) => eq(model.id, user?.id),
@@ -33,7 +33,7 @@ export async function getUserData() {
 export async function getUserWithStartups() {
   const session = await getServerAuthSession();
   const userId = session?.user.id;
-  if (!userId) throw Error("Unauthorized");
+  if (!userId) return null;
   return db.query.users.findFirst({
     where: (model, { eq }) => eq(model.id, userId),
     with: {
@@ -55,8 +55,8 @@ export async function getImageURL(image: string | null | undefined) {
 export async function getStartupPosts(startup: SelectStartups) {
   return await db.query.posts.findMany({
     where: or(
-      eq(posts.createdByStartup, startup.id),
-      eq(posts.createdByUser, startup.founderId),
+      eq(posts.startup_id, startup.id),
+      eq(posts.user_id, startup.founderId),
     ),
     with: {
       createdByUser: true,
@@ -67,22 +67,16 @@ export async function getStartupPosts(startup: SelectStartups) {
 }
 
 export async function getStartupInfo(id: string) {
-  const session = await getServerAuthSession();
-  const userId = session?.user.id;
-  if (!userId) throw Error("Unauthorized");
   return db.query.startups.findFirst({
-    where: and(eq(startups.id, id), eq(startups.founderId, userId)),
+    where: and(eq(startups.id, id)),
   });
 }
 
 export const getStartupAnnouncements = async (startup: SelectStartups) => {
   return db.query.posts.findMany({
     where: or(
-      and(eq(posts.createdByStartup, startup.id), eq(posts.is_pinned, true)),
-      and(
-        eq(posts.createdByUser, startup.founderId),
-        eq(posts.is_pinned, true),
-      ),
+      and(eq(posts.startup_id, startup.id), eq(posts.is_pinned, true)),
+      and(eq(posts.user_id, startup.founderId), eq(posts.is_pinned, true)),
     ),
     with: {
       createdByUser: true,
