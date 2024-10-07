@@ -1,12 +1,11 @@
 "use server";
-import { v4 as uuidv4 } from "uuid";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 import { getServerAuthSession } from "./auth";
 import { db } from "./db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { saveFileInBucket } from "../lib/minio";
+import { getFileFromBucket, saveFileInBucket } from "../lib/minio";
 import { AccessToken } from "livekit-server-sdk";
 import { env } from "@/env";
 import {
@@ -17,12 +16,17 @@ import {
   insertConferenceSchema,
   conferences,
   fileSchema,
-  uuidSchema,
   insertStartupSchema,
   insertPostSchema,
+  postimages,
+  insertJobListingSchema,
+  job_listings,
 } from "./db/schema";
-import { CreateNewPostSchema } from "@/lib/formSchema";
-import { getUserStartups, image_moderation_request } from "./queries";
+import {
+  getUserStartups,
+  image_moderation_request,
+  isFounder,
+} from "./queries";
 import { nanoid } from "nanoid";
 
 export async function updateProfile(
@@ -53,7 +57,7 @@ export async function updateProfile(
 
   const data = parse.data;
 
-  const file_id = uuidv4();
+  const file_id = nanoid();
 
   const new_file = {
     id: file_id,
@@ -102,6 +106,7 @@ export async function updateProfile(
   revalidatePath("/dashboard/settings");
   redirect("/dashboard/settings/");
 }
+
 export async function deleteProfile() {
   const session = await getServerAuthSession();
   if (!session) return { message: "Unauthorized" };
@@ -117,6 +122,41 @@ export async function deleteProfile() {
   }
   revalidatePath("/dashboard/settings");
   redirect("/");
+}
+
+export async function createJobListing(
+  formData: z.infer<typeof insertJobListingSchema>,
+) {
+  const { title, description, location, startup_id, type } =
+    insertJobListingSchema.parse(formData);
+  const is_founder = await isFounder(startup_id);
+  if (!is_founder) return { message: "Unauthorized" };
+  await db.insert(job_listings).values({
+    title,
+    description,
+    location,
+    startup_id,
+    type,
+  });
+  revalidatePath(`/startup/${startup_id}`);
+}
+
+export async function deleteJobListing(data: FormData) {
+  const startup_id = data.get("startup_id")?.toString() ?? "";
+  const job_id = data.get("job_id")?.toString() ?? "";
+
+  const is_founder = await isFounder(startup_id);
+  if (!is_founder) throw { message: "Unauthorized" };
+  await db
+    .delete(job_listings)
+    .where(
+      and(eq(job_listings.id, job_id), eq(job_listings.startup_id, startup_id)),
+    )
+    .catch((e) => {
+      console.log(e);
+    });
+
+  revalidatePath(`/`);
 }
 
 export async function createConfernence(
@@ -148,12 +188,25 @@ export async function createConfernence(
     .returning({ id: conferences.id });
   redirect(`/conference/${new_conference[0]?.id}`);
 }
-export async function createPost(formData: z.infer<typeof insertPostSchema>) {
-  const startups = getUserStartups();
-  const data = insertPostSchema.parse(formData);
 
-  if (!data) throw new Error("Invalid form data");
-
+export async function createPost(formData: FormData) {
+  const startups = await getUserStartups();
+  const { data, error } = insertPostSchema.safeParse({
+    title: formData.get("title"),
+    media: formData.get("media"),
+    is_pinned: formData.get("is_pinned"),
+    content: formData.get("content"),
+    startup_id: formData.get("startup_id"),
+  });
+  if (!data) {
+    return null;
+  }
+  if (!startups?.some((startup) => startup.id === data?.startup_id)) {
+    return null;
+  }
+  if (error) {
+    console.log("error while create post ", error);
+  }
   const new_post = await db
     .insert(posts)
     .values({
@@ -163,6 +216,18 @@ export async function createPost(formData: z.infer<typeof insertPostSchema>) {
       startup_id: data.startup_id,
     })
     .returning({ id: posts.id });
+
+  const filename = await fileUpload(data.media);
+  const new_file = await db.query.files.findFirst({
+    where: eq(files.fileName, filename),
+  });
+
+  if (new_file && new_post[0]) {
+    await db.insert(postimages).values({
+      fileId: new_file.id,
+      postId: new_post[0]?.id,
+    });
+  }
   revalidatePath("/dashboard/startup/[id]", "page");
 
   return { id: new_post[0]?.id };

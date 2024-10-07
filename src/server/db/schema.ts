@@ -25,6 +25,41 @@ export const createTable = pgTableCreator((name) => `startpad_${name}`);
 
 const nanoid = customAlphabet("abcdefghijklmnpqrstuvwxyz0123456789", 14);
 
+export const job_listings = createTable("job_listings", {
+  id: varchar("id", { length: 18 })
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  title: varchar("title", { length: 255 }).notNull(),
+  location: varchar("location", { length: 255 }).notNull(),
+  type: varchar("type", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  created_at: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  startup_id: varchar("startup_id")
+    .references(() => startups.id)
+    .notNull(),
+});
+
+export const job_application = createTable("job_application", {
+  id: varchar("id", { length: 18 })
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  job_id: varchar("job_id", { length: 18 })
+    .references(() => job_listings.id)
+    .notNull(),
+  user_id: varchar("user_id", { length: 18 })
+    .references(() => users.id)
+    .notNull(),
+  resume: varchar("resume", { length: 18 }).references(() => files.id),
+  cover_letter: varchar("cover_letter", { length: 18 }).references(
+    () => files.id,
+  ),
+  created_at: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
+
 export const conferences = createTable("conferences", {
   id: varchar("id", { length: 255 })
     .notNull()
@@ -38,20 +73,17 @@ export const conferences = createTable("conferences", {
     .notNull(),
 });
 
-export const conferenceSpeakers = createTable(
-  "conference_speakers",
-  {
-    conferenceId: varchar("conferenceId", { length: 255 })
-      .references(() => conferences.id)
-      .notNull(),
-    speakerId: varchar("speakerId", { length: 255 })
-      .references(() => users.id)
-      .notNull(),
-  },
-  (table) => ({
-    pk: primaryKey({ columns: [table.speakerId, table.conferenceId] }),
-  }),
-);
+export const conferenceSpeakers = createTable("conference_speakers", {
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  conferenceId: varchar("conferenceId", { length: 255 })
+    .references(() => conferences.id)
+    .notNull(),
+  speakerId: varchar("speakerId", { length: 255 })
+    .references(() => users.id)
+    .notNull(),
+});
 export const posts = createTable(
   "post",
   {
@@ -279,7 +311,17 @@ export const insertStartupSchema = createInsertSchema(startups, {
 }).omit({ founderId: true });
 export const insertConferenceSchema = createInsertSchema(conferences);
 export const uuidSchema = z.string().uuid();
+export const insertJobListingSchema = createInsertSchema(job_listings).omit({
+  created_at: true,
+  id: true,
+});
+export const insertJobApplicationSchema = createInsertSchema(
+  job_application,
+).omit({
+  created_at: true,
 
+  id: true,
+});
 export const insertPostSchema = createInsertSchema(posts, {
   content: z.string().refine(
     (content) => {

@@ -10,6 +10,7 @@ import { Announcements } from "@/app/_components/Announcements";
 import { StartupGallery } from "@/app/startup/StartupGallery";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DisplayServerImages } from "@/app/_components/DisplayServerImages";
+import JobSection from "../JobSection";
 function GallerySkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -54,6 +55,7 @@ export default async function Page({ params }: { params: { id: string } }) {
               <TabsTrigger value="all-posts">All Posts</TabsTrigger>
               <TabsTrigger value="announcements">Announcements</TabsTrigger>
               <TabsTrigger value="gallery">Gallery</TabsTrigger>
+              <TabsTrigger value="jobs">Jobs</TabsTrigger>
             </TabsList>
             <TabsContent className="mt-8" value="all-posts">
               {is_owner && <CreateNewPost startup_id={startup_info?.id} />}
@@ -82,6 +84,9 @@ export default async function Page({ params }: { params: { id: string } }) {
               <Suspense fallback={<GallerySkeleton />}>
                 <StartupGallery startup={startup_info} />
               </Suspense>
+            </TabsContent>
+            <TabsContent value="jobs">
+              <JobSection id={params.id} />
             </TabsContent>
           </Tabs>
         </div>

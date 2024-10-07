@@ -29,7 +29,21 @@ export async function getUserData() {
   });
   return userdata;
 }
-
+export async function getStartupJoblistings(id: string) {
+  return db.query.job_listings.findMany({
+    where: (model, { eq }) => eq(model.startup_id, id),
+  });
+}
+export async function isFounder(startup_id: string) {
+  const session = await getServerAuthSession();
+  const userId = session?.user.id;
+  if (!userId) return false;
+  const startup = await db.query.startups.findFirst({
+    where: (model, { eq }) => eq(model.id, startup_id),
+  });
+  if (!startup) return false;
+  return startup.founderId === userId;
+}
 export async function getUserWithStartups() {
   const session = await getServerAuthSession();
   const userId = session?.user.id;

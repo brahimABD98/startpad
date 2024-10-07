@@ -38,8 +38,9 @@ export default function CreateNewPost({ startup_id }: { startup_id: string }) {
     formData.append("title", data.title);
     formData.append("content", data.content);
     formData.append("startup_id", startup_id);
+    formData.append("media", data.media as Blob);
 
-    await createPost(data)
+    await createPost(formData)
       .then((v) => {
         console.log(v);
         setContent("");
@@ -48,6 +49,7 @@ export default function CreateNewPost({ startup_id }: { startup_id: string }) {
           title: "",
           is_pinned: false,
           content: "",
+          media: undefined,
         });
       })
       .catch(() => console.log("error"));
