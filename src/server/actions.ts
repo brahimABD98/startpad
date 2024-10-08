@@ -141,6 +141,18 @@ export async function createJobListing(
   revalidatePath(`/startup/${startup_id}`);
 }
 
+export async function updateJobListing(
+  id: string,
+  formData: z.infer<typeof insertJobListingSchema>,
+) {
+  const data = insertJobListingSchema.parse(formData);
+  data.updated_at = new Date();
+
+  if (!data) throw new Error("Invalid data");
+  await db.update(job_listings).set(data).where(eq(job_listings.id, id));
+  revalidatePath(`/startup/${data.startup_id}`);
+}
+
 export async function deleteJobListing(data: FormData) {
   const startup_id = data.get("startup_id")?.toString() ?? "";
   const job_id = data.get("job_id")?.toString() ?? "";
@@ -191,22 +203,24 @@ export async function createConfernence(
 
 export async function createPost(formData: FormData) {
   const startups = await getUserStartups();
-  const { data, error } = insertPostSchema.safeParse({
+  const parse = insertPostSchema.safeParse({
     title: formData.get("title"),
-    media: formData.get("media"),
+    media: (formData.get("media") as File)
+      ? (formData.get("media") as File)
+      : undefined,
     is_pinned: formData.get("is_pinned"),
     content: formData.get("content"),
     startup_id: formData.get("startup_id"),
   });
-  if (!data) {
-    return null;
+  if (!parse.success) {
+    console.error("error parsing:", parse.error.errors);
+    return { message: "Invalid form data", error: parse.error.errors };
   }
+  const { data } = parse;
   if (!startups?.some((startup) => startup.id === data?.startup_id)) {
-    return null;
+    return "unallowed";
   }
-  if (error) {
-    console.log("error while create post ", error);
-  }
+
   const new_post = await db
     .insert(posts)
     .values({

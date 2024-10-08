@@ -28,6 +28,7 @@ export default function AddStartup() {
   const form = useForm<Inputs>({
     resolver: zodResolver(insertStartupSchema),
   });
+  const { formState } = form;
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     const formData = new FormData();
     formData.append("name", data.name);
@@ -127,7 +128,9 @@ export default function AddStartup() {
               />
             </div>
             <div className="pt-2">
-              <Button type="submit">submit</Button>
+              <Button disabled={formState.isSubmitting} type="submit">
+                {formState.isSubmitting ? "Creating..." : "Create"}
+              </Button>
             </div>
           </form>
         </Form>

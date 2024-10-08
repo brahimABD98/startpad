@@ -7,30 +7,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, Trash2 } from "lucide-react";
+import { MapPin, Clock } from "lucide-react";
 import React from "react";
-import type { FormEvent } from "react";
 import CreateNewListing from "../_components/CreateNewListing";
-import {
-  getStartupInfo,
-  getStartupJoblistings,
-  getUserWithStartups,
-  isFounder,
-} from "@/server/queries";
-import { db } from "@/server/db";
-import { deleteJobListing } from "@/server/actions";
+import { getStartupJoblistings, isFounder } from "@/server/queries";
 import DeleteJobEntryButton from "../_components/DeleteJobEntryButton";
-interface Job {
-  id: string;
-  title: string;
-  location: string;
-  type: string;
-  description: string;
-}
+import EditJobListing from "../_components/EditJobListing";
 
 export default async function JobSection({ id }: { id: string }) {
   const jobs = await getStartupJoblistings(id);
-
   const is_founder = await isFounder(id);
   return (
     <>
@@ -50,11 +35,21 @@ export default async function JobSection({ id }: { id: string }) {
                     <span>{job.location}</span>
                   </div>
                   {is_founder && (
-                    <DeleteJobEntryButton
-                      startup_id={id}
-                      job_id={job.id}
-                      job_title={job.title}
-                    />
+                    <>
+                      <div className="absolute right-12 top-2 flex">
+                        <EditJobListing
+                          key={job.id + job.updated_at?.toString()}
+                          initialData={job}
+                        />
+                      </div>
+                      <div className="absolute right-0 top-0  flex ">
+                        <DeleteJobEntryButton
+                          startup_id={id}
+                          job_id={job.id}
+                          job_title={job.title}
+                        />
+                      </div>
+                    </>
                   )}
                 </CardHeader>
                 <CardContent>

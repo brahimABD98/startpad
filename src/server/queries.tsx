@@ -34,6 +34,13 @@ export async function getStartupJoblistings(id: string) {
     where: (model, { eq }) => eq(model.startup_id, id),
   });
 }
+
+export async function getJobListingByid(id: string) {
+  return db.query.job_listings.findFirst({
+    where: (model, { eq }) => eq(model.id, id),
+  });
+}
+
 export async function isFounder(startup_id: string) {
   const session = await getServerAuthSession();
   const userId = session?.user.id;

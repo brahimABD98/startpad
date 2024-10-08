@@ -10,7 +10,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { customAlphabet } from "nanoid";
 import { generateConferenceId } from "@/lib/utils";
 import { z } from "zod";
@@ -24,7 +24,6 @@ import { z } from "zod";
 export const createTable = pgTableCreator((name) => `startpad_${name}`);
 
 const nanoid = customAlphabet("abcdefghijklmnpqrstuvwxyz0123456789", 14);
-
 export const job_listings = createTable("job_listings", {
   id: varchar("id", { length: 18 })
     .primaryKey()
@@ -33,6 +32,7 @@ export const job_listings = createTable("job_listings", {
   location: varchar("location", { length: 255 }).notNull(),
   type: varchar("type", { length: 255 }).notNull(),
   description: text("description").notNull(),
+  updated_at: timestamp("updated_at"),
   created_at: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -310,6 +310,7 @@ export const insertStartupSchema = createInsertSchema(startups, {
     .default(() => new Date().toISOString()),
 }).omit({ founderId: true });
 export const insertConferenceSchema = createInsertSchema(conferences);
+export const selectJobListingSchema = createSelectSchema(job_listings);
 export const uuidSchema = z.string().uuid();
 export const insertJobListingSchema = createInsertSchema(job_listings).omit({
   created_at: true,
@@ -322,7 +323,10 @@ export const insertJobApplicationSchema = createInsertSchema(
 
   id: true,
 });
+
+
 export const insertPostSchema = createInsertSchema(posts, {
+  is_pinned: z.coerce.boolean().default(false),
   content: z.string().refine(
     (content) => {
       const regex = /(<([^>]+)>)/gi;
@@ -334,5 +338,6 @@ export const insertPostSchema = createInsertSchema(posts, {
 })
   .omit({ user_id: true })
   .extend({
-    media: fileSchema.optional(),
+    media: z.
+    any(),
   });

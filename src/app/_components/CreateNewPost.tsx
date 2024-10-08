@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { createPost } from "@/server/actions";
 import TextEditor from "./TextEditor";
 import { Input } from "@/components/ui/input";
@@ -31,20 +31,25 @@ export default function CreateNewPost({ startup_id }: { startup_id: string }) {
   }, [content]);
   const form = useForm<Inputs>({
     resolver: zodResolver(insertPostSchema),
+    defaultValues: {
+      media: undefined,
+    },
   });
-  const { setValue } = form;
+  const { setValue, formState } = form;
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    console.log("media media", data.media);
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("content", data.content);
     formData.append("startup_id", startup_id);
-    formData.append("media", data.media as Blob);
-
+    formData.append("is_pinned", data.is_pinned ? "true" : "false");
+    if (data.media) {
+      formData.append("media", data.media as Blob);
+    }
     await createPost(formData)
       .then((v) => {
         console.log(v);
         setContent("");
-        localStorage.removeItem("textEditorData");
         form.reset({
           title: "",
           is_pinned: false,
@@ -106,18 +111,36 @@ export default function CreateNewPost({ startup_id }: { startup_id: string }) {
                     </FormItem>
                   )}
                 />
-                <Input
-                  onChange={(e) => {
-                    if (e.target.files?.[0])
-                      form.setValue("media", e.target.files[0]);
-                  }}
-                  type="file"
-                  id="media"
+                <FormField
                   name="media"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Media</FormLabel>
+                      <FormControl>
+                        <Input
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              field.onChange(file); // Update the form state with the selected file
+                            } else {
+                              field.onChange(undefined);
+                            }
+                          }}
+                          type="file"
+                          id="media"
+                          onBlur={field.onBlur}
+                          ref={field.ref}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
+
                 <div className="mt-2 flex items-center justify-end space-x-2">
-                  <Button size="sm" type="submit">
-                    Post
+                  <Button disabled={formState.isSubmitting} type="submit">
+                    {formState.isSubmitting ? "Posting..." : "Post"}
                   </Button>
                 </div>
               </div>
