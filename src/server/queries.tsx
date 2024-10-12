@@ -38,6 +38,9 @@ export async function getStartupJoblistings(id: string) {
 export async function getJobListingByid(id: string) {
   return db.query.job_listings.findFirst({
     where: (model, { eq }) => eq(model.id, id),
+    with: {
+      startup: true,
+    },
   });
 }
 

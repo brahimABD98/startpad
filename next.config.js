@@ -21,6 +21,9 @@ const config = {
       {
         hostname: "lh3.googleusercontent.com",
       },
+      {
+        hostname: "cdn.discordapp.com",
+      },
     ],
   },
 };

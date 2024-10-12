@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { DialogHeader } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogTrigger,
@@ -25,10 +26,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Separator } from "@/components/ui/separator";
 export default function CreateNewListing({ id }: { id: string }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   type Inputs = z.infer<typeof insertJobListingSchema>;
   const form = useForm<Inputs>({
+    defaultValues: {
+      payrange: "",
+      responsabilities: "",
+      requirements: "",
+    },
     resolver: zodResolver(insertJobListingSchema),
   });
   const { setValue, formState } = form;
@@ -54,7 +61,7 @@ export default function CreateNewListing({ id }: { id: string }) {
           Create New Listing
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[80vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Job Listing</DialogTitle>
         </DialogHeader>
@@ -110,6 +117,53 @@ export default function CreateNewListing({ id }: { id: string }) {
                   <FormLabel>Description</FormLabel>
                   <FormControl>
                     <Textarea {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div>
+              <FormLabel>Optional:</FormLabel>
+            </div>
+            <Separator />
+            <FormField
+              control={form.control}
+              name="payrange"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Pay Range</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="example: 150k $"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="requirements"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Requirements</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="responsabilities"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Responsablilities</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

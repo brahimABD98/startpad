@@ -13,6 +13,7 @@ import CreateNewListing from "../_components/CreateNewListing";
 import { getStartupJoblistings, isFounder } from "@/server/queries";
 import DeleteJobEntryButton from "../_components/DeleteJobEntryButton";
 import EditJobListing from "../_components/EditJobListing";
+import Link from "next/link";
 
 export default async function JobSection({ id }: { id: string }) {
   const jobs = await getStartupJoblistings(id);
@@ -61,7 +62,7 @@ export default async function JobSection({ id }: { id: string }) {
                 </CardContent>
                 <CardFooter className="mt-auto">
                   <Button disabled={is_founder} className="w-full">
-                    Apply Now
+                    <Link href={`/job/${job.id}`}>Apply Now</Link>
                   </Button>
                 </CardFooter>
               </Card>

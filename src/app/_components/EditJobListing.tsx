@@ -121,6 +121,49 @@ export default function EditJobListing({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="payrange"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Pay Range</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="150k $"
+                      {...field}
+                      value={field.value ?? ""}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="requirements"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Requirements</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="responsabilities"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Responsablilities</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <Button disabled={formState.isSubmitting} type="submit">
               {formState.isSubmitting ? "Updating..." : "Update"}
             </Button>

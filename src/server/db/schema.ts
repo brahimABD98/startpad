@@ -14,6 +14,7 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { customAlphabet } from "nanoid";
 import { generateConferenceId } from "@/lib/utils";
 import { z } from "zod";
+import { start } from "repl";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -30,6 +31,9 @@ export const job_listings = createTable("job_listings", {
     .$defaultFn(() => nanoid()),
   title: varchar("title", { length: 255 }).notNull(),
   location: varchar("location", { length: 255 }).notNull(),
+  payrange: varchar("payrange", { length: 255 }),
+  responsabilities: text("responsabilities"),
+  requirements: text("requirements"),
   type: varchar("type", { length: 255 }).notNull(),
   description: text("description").notNull(),
   updated_at: timestamp("updated_at"),
@@ -240,8 +244,16 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   }),
 }));
 
-export const startupsRelations = relations(startups, ({ one }) => ({
+export const jobListingsRelations = relations(job_listings, ({ one }) => ({
+  startup: one(startups, {
+    fields: [job_listings.startup_id],
+    references: [startups.id],
+  }),
+}));
+
+export const startupsRelations = relations(startups, ({ one, many }) => ({
   founder: one(users, { fields: [startups.founderId], references: [users.id] }),
+  jobListings: many(job_listings),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -324,7 +336,6 @@ export const insertJobApplicationSchema = createInsertSchema(
   id: true,
 });
 
-
 export const insertPostSchema = createInsertSchema(posts, {
   is_pinned: z.coerce.boolean().default(false),
   content: z.string().refine(
@@ -338,6 +349,5 @@ export const insertPostSchema = createInsertSchema(posts, {
 })
   .omit({ user_id: true })
   .extend({
-    media: z.
-    any(),
+    media: z.any(),
   });

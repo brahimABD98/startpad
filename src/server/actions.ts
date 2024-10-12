@@ -127,12 +127,15 @@ export async function deleteProfile() {
 export async function createJobListing(
   formData: z.infer<typeof insertJobListingSchema>,
 ) {
-  const { title, description, location, startup_id, type } =
+  const { title, description, location, startup_id, type, responsabilities, requirements, payrange } =
     insertJobListingSchema.parse(formData);
   const is_founder = await isFounder(startup_id);
   if (!is_founder) return { message: "Unauthorized" };
   await db.insert(job_listings).values({
     title,
+    payrange,
+    responsabilities,
+    requirements,
     description,
     location,
     startup_id,
