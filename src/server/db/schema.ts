@@ -45,7 +45,7 @@ export const job_listings = createTable("job_listings", {
     .notNull(),
 });
 
-export const job_application = createTable("job_application", {
+export const job_applications = createTable("job_application", {
   id: varchar("id", { length: 18 })
     .primaryKey()
     .$defaultFn(() => nanoid()),
@@ -313,7 +313,22 @@ export const fileSchema = z.instanceof(File).refine(
       "File must be an image type and its size must be greater than 0 and less than 4 MB",
   },
 );
-
+const ALLOWED_DOCUMENTS_MIMES = [
+  'application/pdf',    // PDF
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
+  'application/msword', // DOC
+]
+export const documentSchema = z.instanceof(File).refine(
+  (file) => {
+    if (!file || !(file instanceof File)) return true
+    return (
+      ALLOWED_DOCUMENTS_MIMES.includes(file.type) &&
+      file.size > 0 &&
+      file.size < 20 * 1024 * 1024
+    )
+  },
+  { message: "Document must be a doc or pdf file and less than 20 MB" }
+)
 export const insertStartupSchema = createInsertSchema(startups, {
   logo: fileSchema.optional(),
   foundedAt: z
@@ -329,7 +344,10 @@ export const insertJobListingSchema = createInsertSchema(job_listings).omit({
   id: true,
 });
 export const insertJobApplicationSchema = createInsertSchema(
-  job_application,
+  job_applications, {
+  cover_letter: fileSchema,
+  resume: fileSchema
+}
 ).omit({
   created_at: true,
 

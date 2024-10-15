@@ -13,6 +13,7 @@ import {
   posts,
   startups,
   users,
+  job_applications,
   insertConferenceSchema,
   conferences,
   fileSchema,
@@ -21,6 +22,7 @@ import {
   postimages,
   insertJobListingSchema,
   job_listings,
+  insertJobApplicationSchema,
 } from "./db/schema";
 import {
   getUserStartups,
@@ -127,8 +129,16 @@ export async function deleteProfile() {
 export async function createJobListing(
   formData: z.infer<typeof insertJobListingSchema>,
 ) {
-  const { title, description, location, startup_id, type, responsabilities, requirements, payrange } =
-    insertJobListingSchema.parse(formData);
+  const {
+    title,
+    description,
+    location,
+    startup_id,
+    type,
+    responsabilities,
+    requirements,
+    payrange,
+  } = insertJobListingSchema.parse(formData);
   const is_founder = await isFounder(startup_id);
   if (!is_founder) return { message: "Unauthorized" };
   await db.insert(job_listings).values({
@@ -203,7 +213,41 @@ export async function createConfernence(
     .returning({ id: conferences.id });
   redirect(`/conference/${new_conference[0]?.id}`);
 }
+export async function addJobApplication(formData: FormData) {
+  const session = await getServerAuthSession();
+  const user = session?.user;
+  if (!user) return null;
+  const data = insertJobApplicationSchema.parse({
+    job_id: formData.get("job_id"),
+    user_id: user.id,
+    resume: formData.get("resume"),
+    cover_letter: formData.get("cover_letter"),
+  });
+  if (!data) return null;
+  const job = await db.query.job_listings.findFirst({
+    where: eq(job_listings.id, data.job_id),
+  });
+  if (!job) return null;
+  let resume = null;
+  let cover_letter = null;
+  if (data.resume) {
+    resume = await fileUpload(data.resume, fileUploadType.document, false);
+  }
+  if (data.cover_letter) {
+    cover_letter = await fileUpload(
+      data.cover_letter,
+      fileUploadType.document,
+      false,
+    );
+  }
 
+  await db.insert(job_applications).values({
+    job_id: job.id,
+    user_id: user.id,
+    cover_letter,
+    resume,
+  });
+}
 export async function createPost(formData: FormData) {
   const startups = await getUserStartups();
   const parse = insertPostSchema.safeParse({
@@ -233,7 +277,6 @@ export async function createPost(formData: FormData) {
       startup_id: data.startup_id,
     })
     .returning({ id: posts.id });
-
   const filename = await fileUpload(data.media);
   const new_file = await db.query.files.findFirst({
     where: eq(files.fileName, filename),
@@ -305,13 +348,34 @@ export async function generateParticiaptionToken(roomid: string) {
   return await token.toJwt();
 }
 
-export async function fileUpload(data: globalThis.File | undefined) {
+enum fileUploadType {
+  image,
+  video,
+  document,
+}
+export async function fileUpload(
+  data: globalThis.File | undefined,
+  type: fileUploadType = fileUploadType.image,
+  with_moderation = true,
+) {
   if (!data) throw new Error("No file provided");
-  data.type;
-  const moderation_form_data = new FormData();
-  moderation_form_data.append("image", data as Blob);
-
-  const moderation = await image_moderation_request(moderation_form_data);
+  let moderation = null;
+  if (with_moderation) {
+    const moderation_form_data = new FormData();
+    switch (type) {
+      case fileUploadType.image:
+        moderation_form_data.append("image", data as Blob);
+        moderation = await image_moderation_request(moderation_form_data);
+        break;
+      case fileUploadType.video:
+        moderation_form_data.append("video", data as Blob);
+        moderation = await image_moderation_request(moderation_form_data);
+        break;
+      case fileUploadType.document:
+        moderation_form_data.append("document", data as Blob);
+        break;
+    }
+  }
   const id = nanoid();
   const filename = `${id}.${data.type.split("/")[1]}`;
 
