@@ -52,13 +52,11 @@ export const job_applications = createTable("job_application", {
   job_id: varchar("job_id", { length: 18 })
     .references(() => job_listings.id)
     .notNull(),
-  user_id: varchar("user_id", { length: 18 })
+  user_id: varchar("user_id")
     .references(() => users.id)
     .notNull(),
-  resume: varchar("resume", { length: 18 }).references(() => files.id),
-  cover_letter: varchar("cover_letter", { length: 18 }).references(
-    () => files.id,
-  ),
+  resume: varchar("resume").references(() => files.id),
+  cover_letter: varchar("cover_letter").references(() => files.id),
   created_at: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -232,6 +230,30 @@ export type UserWithStartups = SelectUser & {
   startups: SelectStartups[];
 };
 
+export const jobApplicationsRelations = relations(
+  job_applications,
+  ({ one }) => ({
+    resume: one(files, {
+      fields: [job_applications.resume],
+      references: [files.id],
+      relationName: "resume",
+    }),
+    coverLetter: one(files, {
+      fields: [job_applications.cover_letter],
+      references: [files.id],
+      relationName: "coverLetter",
+    }),
+    user: one(users, {
+      fields: [job_applications.user_id],
+      references: [users.id],
+    }),
+    job: one(job_listings, {
+      fields: [job_applications.job_id],
+      references: [job_listings.id],
+    }),
+  }),
+);
+
 export const postsRelations = relations(posts, ({ one, many }) => ({
   createdByUser: one(users, {
     fields: [posts.user_id],
@@ -244,12 +266,16 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
   }),
 }));
 
-export const jobListingsRelations = relations(job_listings, ({ one }) => ({
-  startup: one(startups, {
-    fields: [job_listings.startup_id],
-    references: [startups.id],
+export const jobListingsRelations = relations(
+  job_listings,
+  ({ one, many }) => ({
+    startup: one(startups, {
+      fields: [job_listings.startup_id],
+      references: [startups.id],
+    }),
+    jobApplications: many(job_applications),
   }),
-}));
+);
 
 export const startupsRelations = relations(startups, ({ one, many }) => ({
   founder: one(users, { fields: [startups.founderId], references: [users.id] }),
@@ -265,6 +291,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   startups: many(startups),
   posts: many(posts),
   conferenceSpeakers: many(conferenceSpeakers),
+  jobApplications: many(job_applications),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({
@@ -273,6 +300,10 @@ export const accountsRelations = relations(accounts, ({ one }) => ({
 
 export const fileRelations = relations(files, ({ many }) => ({
   postImages: many(postimages),
+  jobApplicationsResume: many(job_applications, { relationName: "resume" }),
+  jobApplicationsCoverLetter: many(job_applications, {
+    relationName: "coverLetter",
+  }),
 }));
 
 export const postImagesRelations = relations(postimages, ({ one }) => ({
@@ -314,21 +345,20 @@ export const fileSchema = z.instanceof(File).refine(
   },
 );
 const ALLOWED_DOCUMENTS_MIMES = [
-  'application/pdf',    // PDF
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
-  'application/msword', // DOC
-]
+  "application/pdf", // PDF
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
+  "application/msword", // DOC
+];
 export const documentSchema = z.instanceof(File).refine(
   (file) => {
-    if (!file || !(file instanceof File)) return true
+    if (!file || !(file instanceof File)) return true;
     return (
-      ALLOWED_DOCUMENTS_MIMES.includes(file.type) &&
-      file.size > 0 &&
-      file.size < 20 * 1024 * 1024
-    )
+      // ALLOWED_DOCUMENTS_MIMES.includes(file.type) &&
+      file.size > 0 && file.size < 20 * 1024 * 1024
+    );
   },
-  { message: "Document must be a doc or pdf file and less than 20 MB" }
-)
+  { message: "Document must be a doc or pdf file and less than 20 MB" },
+);
 export const insertStartupSchema = createInsertSchema(startups, {
   logo: fileSchema.optional(),
   foundedAt: z
@@ -343,12 +373,10 @@ export const insertJobListingSchema = createInsertSchema(job_listings).omit({
   created_at: true,
   id: true,
 });
-export const insertJobApplicationSchema = createInsertSchema(
-  job_applications, {
-  cover_letter: fileSchema,
-  resume: fileSchema
-}
-).omit({
+export const insertJobApplicationSchema = createInsertSchema(job_applications, {
+  cover_letter: documentSchema,
+  resume: documentSchema,
+}).omit({
   created_at: true,
 
   id: true,

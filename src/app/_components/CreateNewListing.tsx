@@ -41,7 +41,7 @@ export default function CreateNewListing({ id }: { id: string }) {
   const { setValue, formState } = form;
   useEffect(() => {
     setValue("startup_id", id);
-  }, [id]);
+  }, [id, setValue]);
   const handleSubmit: SubmitHandler<Inputs> = async (data) => {
     await createJobListing(data);
     setIsDialogOpen(false);

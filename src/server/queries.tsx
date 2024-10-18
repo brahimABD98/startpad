@@ -4,7 +4,13 @@ import { createAPIFormMethod, isValidURL } from "@/lib/utils";
 import { getServerAuthSession } from "./auth";
 import { eq, and, or, inArray } from "drizzle-orm";
 import { env } from "@/env";
-import { startups, posts, postimages } from "./db/schema";
+import {
+  startups,
+  posts,
+  postimages,
+  files,
+  job_applications,
+} from "./db/schema";
 import type { SelectPosts, SelectStartups } from "./db/schema";
 import { createPresignedUrlToDownload } from "@/lib/minio";
 export async function getUserStartups() {
@@ -30,9 +36,22 @@ export async function getUserData() {
   return userdata;
 }
 export async function getStartupJoblistings(id: string) {
-  return db.query.job_listings.findMany({
-    where: (model, { eq }) => eq(model.startup_id, id),
+  const session = await getServerAuthSession();
+  const is_founder = await isFounder(id);
+
+  if (!session || is_founder)
+    return db.query.job_listings.findMany({
+      where: (model, { eq }) => eq(model.startup_id, id),
+    });
+  const user = session?.user;
+  const job_applications_availble = await db.query.job_applications.findMany({
+    with: {
+      job: true,
+    },
+    where: (model, { eq, and, not }) =>
+      and(eq(model.job_id, id), not(eq(model.user_id, user.id))),
   });
+  return job_applications_availble.map((model) => model.job);
 }
 
 export async function getJobListingByid(id: string) {
@@ -41,6 +60,18 @@ export async function getJobListingByid(id: string) {
     with: {
       startup: true,
     },
+  });
+}
+export async function getjobwithCandidates(startup_id: string, job_id: string) {
+  const is_founder = await isFounder(startup_id);
+  if (!is_founder) return [];
+  return db.query.job_applications.findMany({
+    with: {
+      coverLetter: true,
+      user: true,
+      resume: true,
+    },
+    where: (model, { eq }) => eq(model.job_id, job_id),
   });
 }
 
@@ -119,6 +150,19 @@ export async function getStartupImages(posts: SelectPosts[]) {
     with: {
       file: true,
     },
+  });
+}
+
+export async function getFileByFilename(filename: string) {
+  return await db.query.files.findFirst({
+    where: eq(files.fileName, filename),
+  });
+}
+
+export async function generateDocumentUrl(filename: string) {
+  return createPresignedUrlToDownload({
+    fileName: filename,
+    bucketName: "startpad",
   });
 }
 

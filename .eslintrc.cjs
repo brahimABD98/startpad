@@ -24,6 +24,7 @@ const config = {
     "plugin:@typescript-eslint/stylistic-type-checked",
   ],
   rules: {
+    semi: ["warn"],
     "no-restricted-imports": ["error", { patterns: ["@radix-ui/*"] }],
     "@typescript-eslint/array-type": "off",
     "@typescript-eslint/consistent-type-definitions": "off",

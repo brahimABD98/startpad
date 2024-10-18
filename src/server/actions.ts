@@ -27,6 +27,7 @@ import {
 import {
   getUserStartups,
   image_moderation_request,
+  getFileByFilename,
   isFounder,
 } from "./queries";
 import { nanoid } from "nanoid";
@@ -214,39 +215,56 @@ export async function createConfernence(
   redirect(`/conference/${new_conference[0]?.id}`);
 }
 export async function addJobApplication(formData: FormData) {
+  console.log("Starting job application process");
+
   const session = await getServerAuthSession();
   const user = session?.user;
-  if (!user) return null;
-  const data = insertJobApplicationSchema.parse({
-    job_id: formData.get("job_id"),
-    user_id: user.id,
-    resume: formData.get("resume"),
-    cover_letter: formData.get("cover_letter"),
-  });
-  if (!data) return null;
-  const job = await db.query.job_listings.findFirst({
-    where: eq(job_listings.id, data.job_id),
-  });
-  if (!job) return null;
-  let resume = null;
-  let cover_letter = null;
-  if (data.resume) {
-    resume = await fileUpload(data.resume, fileUploadType.document, false);
-  }
-  if (data.cover_letter) {
-    cover_letter = await fileUpload(
-      data.cover_letter,
-      fileUploadType.document,
-      false,
-    );
+  if (!user) {
+    console.error("No user session found");
+    return null;
   }
 
-  await db.insert(job_applications).values({
-    job_id: job.id,
-    user_id: user.id,
-    cover_letter,
-    resume,
-  });
+  try {
+    const data = insertJobApplicationSchema.parse({
+      job_id: formData.get("job_id"),
+      user_id: user.id,
+      resume: formData.get("resume"),
+      cover_letter: formData.get("cover_letter"),
+    });
+
+    const job = await db.query.job_listings.findFirst({
+      where: eq(job_listings.id, data.job_id),
+    });
+    if (!job) {
+      console.error("Job not found");
+      return null;
+    }
+
+    const [resume, cover_letter] = await Promise.all([
+      data.resume ? handleFileUpload(data.resume) : null,
+      data.cover_letter ? handleFileUpload(data.cover_letter) : null,
+    ]);
+
+    await db.insert(job_applications).values({
+      job_id: job.id,
+      user_id: user.id,
+      resume: resume?.id,
+      cover_letter: cover_letter?.id,
+    });
+
+    console.log("Job application submitted successfully");
+  } catch (error) {
+    console.error("Error processing job application:", error);
+    return null;
+  }
+}
+async function handleFileUpload(file: File) {
+  const uploadedFilename = await fileUpload(
+    file,
+    fileUploadType.document,
+    false,
+  );
+  return getFileByFilename(uploadedFilename);
 }
 export async function createPost(formData: FormData) {
   const startups = await getUserStartups();
@@ -353,6 +371,7 @@ enum fileUploadType {
   video,
   document,
 }
+
 export async function fileUpload(
   data: globalThis.File | undefined,
   type: fileUploadType = fileUploadType.image,

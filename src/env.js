@@ -33,7 +33,7 @@ export const env = createEnv({
     S3_ACCESS_KEY: z.string(),
     S3_SECRET_KEY: z.string(),
     S3_BUCKET_NAME: z.string(),
-    S3_USE_SSL: z.string().default("true"),
+    S3_USE_SSL: z.string().default("false"),
     LIVEKIT_API_KEY: z.string(),
     LIVEKIT_API_SECRET: z.string(),
     MODERATION_API_URL: z.string(),

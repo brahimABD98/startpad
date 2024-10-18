@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, ChangeEvent } from "react";
+import React, { useState, useEffect } from "react";
+import type { ChangeEvent } from "react";
 import { Input } from "@/components/ui/input"; // Shadcn Input component
 import { Badge } from "@/components/ui/badge"; // Shadcn Badge component
 import { Card, CardContent, CardTitle } from "@/components/ui/card"; // Shadcn Card components
