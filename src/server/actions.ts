@@ -5,7 +5,7 @@ import { getServerAuthSession } from "./auth";
 import { db } from "./db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getFileFromBucket, saveFileInBucket } from "../lib/minio";
+import {  saveFileInBucket } from "../lib/minio";
 import { AccessToken } from "livekit-server-sdk";
 import { env } from "@/env";
 import {
@@ -295,6 +295,7 @@ export async function createPost(formData: FormData) {
       startup_id: data.startup_id,
     })
     .returning({ id: posts.id });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const filename = await fileUpload(data.media);
   const new_file = await db.query.files.findFirst({
     where: eq(files.fileName, filename),

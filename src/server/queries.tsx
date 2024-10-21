@@ -9,7 +9,6 @@ import {
   posts,
   postimages,
   files,
-  job_applications,
 } from "./db/schema";
 import type { SelectPosts, SelectStartups } from "./db/schema";
 import { createPresignedUrlToDownload } from "@/lib/minio";

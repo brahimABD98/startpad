@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, DollarSign, Briefcase, Download } from "lucide-react";
 import CreateJobApplication from "@/app/_components/CreateJobApplication";
 import { getServerAuthSession } from "@/server/auth";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DisplayServerImages } from "@/app/_components/DisplayServerImages";
 import {
   Dialog,

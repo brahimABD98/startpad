@@ -28,8 +28,6 @@ export default function DeleteJobEntryButton({
   startup_id: string;
   job_title: string;
 }) {
-  const { pending } = useFormStatus();
-
   return (
     <form action={deleteJobListing}>
       <input hidden type=" text" name="startup_id" value={startup_id} />

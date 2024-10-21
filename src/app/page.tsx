@@ -1,10 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getServerAuthSession } from "@/server/auth";
 import {
   ArrowRight,
   CheckCircle,
-  Rocket,
   Users,
   TrendingUp,
 } from "lucide-react";

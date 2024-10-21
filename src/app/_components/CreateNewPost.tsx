@@ -21,14 +21,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { insertPostSchema } from "@/server/db/schema";
 export default function CreateNewPost({ startup_id }: { startup_id: string }) {
   const [content, setContent] = useState("");
-  useEffect(() => {
-    setValue("startup_id", startup_id);
-  }, [startup_id]);
 
   type Inputs = z.infer<typeof insertPostSchema>;
-  useEffect(() => {
-    setValue("content", content);
-  }, [content]);
   const form = useForm<Inputs>({
     resolver: zodResolver(insertPostSchema),
     defaultValues: {
@@ -59,7 +53,13 @@ export default function CreateNewPost({ startup_id }: { startup_id: string }) {
       })
       .catch(() => console.log("error"));
   };
+  useEffect(() => {
+    setValue("startup_id", startup_id);
+  }, [startup_id, setValue]);
 
+  useEffect(() => {
+    setValue("content", content);
+  }, [content, setValue]);
   return (
     <Card>
       <Form {...form}>

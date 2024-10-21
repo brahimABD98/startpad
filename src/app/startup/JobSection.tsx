@@ -61,9 +61,9 @@ export default async function JobSection({ id }: { id: string }) {
                   <p className="text-gray-600">{job.description}</p>
                 </CardContent>
                 <CardFooter className="mt-auto">
-                  <Button disabled={!is_founder} className="w-full">
+                  <Button className="w-full">
                     <Link href={`/job/${job.id}`}>
-                      {is_founder ? "Edit" : "Apply Now"}
+                      {is_founder ? "View" : "Apply Now"}
                     </Link>
                   </Button>
                 </CardFooter>

@@ -1,4 +1,4 @@
-import type { SelectStartups, StartupWithPosts } from "@/server/db/schema";
+import type { SelectStartups } from "@/server/db/schema";
 import React from "react";
 import { getStartupImages, getStartupPosts } from "@/server/queries";
 import { DisplayServerImages } from "@/app/_components/DisplayServerImages";

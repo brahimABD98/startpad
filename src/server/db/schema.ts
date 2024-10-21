@@ -14,7 +14,6 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { customAlphabet } from "nanoid";
 import { generateConferenceId } from "@/lib/utils";
 import { z } from "zod";
-import { start } from "repl";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -70,7 +69,7 @@ export const conferences = createTable("conferences", {
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description").notNull(),
   startDate: timestamp("startDate", { mode: "string" }).notNull(),
-  createdBy: varchar("createdBy")
+  startup_id: varchar("startup_id")
     .references(() => startups.id)
     .notNull(),
 });
@@ -344,11 +343,7 @@ export const fileSchema = z.instanceof(File).refine(
       "File must be an image type and its size must be greater than 0 and less than 4 MB",
   },
 );
-const ALLOWED_DOCUMENTS_MIMES = [
-  "application/pdf", // PDF
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // DOCX
-  "application/msword", // DOC
-];
+
 export const documentSchema = z.instanceof(File).refine(
   (file) => {
     if (!file || !(file instanceof File)) return true;

@@ -1,6 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
-import { Home, ListFilter, Package2, PlusCircle, Settings } from "lucide-react";
+import { Home, ListFilter, Settings } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -126,7 +125,7 @@ export default async function Page() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {startups.length === 0 && (
+                  {startups?.length === 0 && (
                     <>
                       <div className="m-4 flex flex-1 items-center justify-center rounded-lg border border-dashed p-4 shadow-sm">
                         <div className="flex flex-col items-center gap-1 text-center">
@@ -141,7 +140,7 @@ export default async function Page() {
                       </div>
                     </>
                   )}
-                  {startups.map((startup) => (
+                  {startups?.map((startup) => (
                     <>
                       <Card key={startup.id} className="lg:w-1/4">
                         <CardHeader className="flex flex-row items-center gap-4 p-4">
