@@ -43,13 +43,13 @@ export default function CreateConfernence({
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     await createConfernence(data);
   };
-
+  const { formState } = form;
   return (
     <>
       <Dialog>
         <DialogTrigger asChild>
-          <Button variant="outline" className="w-full">
-            Join me mem memememe
+          <Button variant="default" className="w-full">
+            Create Conference
           </Button>
         </DialogTrigger>
         <DialogContent>
@@ -120,7 +120,9 @@ export default function CreateConfernence({
               />
 
               <DialogFooter className="py-4">
-                <Button type="submit">Save changes</Button>
+                <Button disabled={formState.isSubmitting} type="submit">
+                  Save changes
+                </Button>
               </DialogFooter>
             </form>
           </Form>

@@ -4,12 +4,7 @@ import { createAPIFormMethod, isValidURL } from "@/lib/utils";
 import { getServerAuthSession } from "./auth";
 import { eq, and, or, inArray } from "drizzle-orm";
 import { env } from "@/env";
-import {
-  startups,
-  posts,
-  postimages,
-  files,
-} from "./db/schema";
+import { startups, posts, postimages, files } from "./db/schema";
 import type { SelectPosts, SelectStartups } from "./db/schema";
 import { createPresignedUrlToDownload } from "@/lib/minio";
 export async function getUserStartups() {
@@ -165,11 +160,13 @@ export async function generateDocumentUrl(filename: string) {
   });
 }
 
-export async function getLatestConferences() {
+export async function getLatestConferences(startup_id: string) {
   return await db.query.conferences.findMany({
+    where: (model, { eq }) => eq(model.startup_id, startup_id),
     orderBy: (model, { desc }) => [desc(model.startDate)],
   });
 }
+
 export const image_moderation_request = createAPIFormMethod<{
   task_id: string;
   created_at: string;

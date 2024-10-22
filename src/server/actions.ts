@@ -197,22 +197,22 @@ export async function createConfernence(
   // check if data.createdby is in users.startups
   const startup = await db.query.startups.findFirst({
     where: and(
-      eq(startups.id, data.createdBy),
+      eq(startups.id, data.startup_id),
       eq(startups.founderId, session?.user.id),
     ),
   });
   if (!startup) return { message: "Unauthorized" };
 
-  const new_conference = await db
+  const [new_conference] = await db
     .insert(conferences)
     .values({
       startDate: data.startDate,
       name: data.name,
       description: data.description,
-      createdBy: startup.id,
+      startup_id: startup.id,
     })
     .returning({ id: conferences.id });
-  redirect(`/conference/${new_conference[0]?.id}`);
+  redirect(`/conference/${new_conference?.id}`);
 }
 export async function addJobApplication(formData: FormData) {
   console.log("Starting job application process");

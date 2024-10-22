@@ -4,10 +4,7 @@ import { TabsTrigger, TabsList, TabsContent, Tabs } from "@/components/ui/tabs";
 import { CardHeader, CardContent, Card } from "@/components/ui/card";
 import { Mountain } from "lucide-react";
 import CreateNewPost from "@/app/_components/CreateNewPost";
-import {
-  getStartupInfo,
-  isFounder,
-} from "@/server/queries";
+import { getStartupInfo, isFounder } from "@/server/queries";
 import { DisplayAllPosts } from "@/app/_components/DisplayAllPosts";
 import { Announcements } from "@/app/_components/Announcements";
 import { StartupGallery } from "@/app/startup/StartupGallery";
@@ -15,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DisplayServerImages } from "@/app/_components/DisplayServerImages";
 import JobSection from "../JobSection";
 import CreateConference from "@/app/_components/CreateConference";
+import DisplayConferences from "@/app/_components/DisplayConferences";
 function GallerySkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -98,6 +96,9 @@ export default async function Page({ params }: { params: { id: string } }) {
                   <CreateConference startup_id={params.id} />
                 </>
               )}
+              <Suspense fallback={<div>Loading conferences...</div>}>
+                <DisplayConferences startup_id={params.id} />
+              </Suspense>
             </TabsContent>
           </Tabs>
         </div>
