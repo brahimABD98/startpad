@@ -22,7 +22,6 @@ export function validateFiles(
   if (files.length > FILE_NUMBER_LIMIT) {
     return `You can upload maximum ${FILE_NUMBER_LIMIT} files at a time`;
   }
-  return;
 }
 
 /**

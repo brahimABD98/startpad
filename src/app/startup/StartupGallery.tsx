@@ -2,7 +2,7 @@ import type { SelectStartups } from "@/server/db/schema";
 import React from "react";
 import { getStartupImages, getStartupPosts } from "@/server/queries";
 import { DisplayServerImages } from "@/app/_components/DisplayServerImages";
-export async function StartupGallery({ startup }: { startup: SelectStartups }) {
+export async function StartupGallery({ startup }: Readonly<{ startup: SelectStartups }>) {
   const posts = await getStartupPosts(startup);
   if (!posts) return null;
   const images = await getStartupImages(posts);

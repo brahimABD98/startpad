@@ -89,7 +89,7 @@ export async function getUserWithStartups() {
       startups: true,
     },
   });
-  5;
+
 }
 export async function getImageURL(image: string | null | undefined) {
   if (!image) return;

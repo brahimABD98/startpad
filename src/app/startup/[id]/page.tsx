@@ -22,7 +22,7 @@ function GallerySkeleton() {
     </div>
   );
 }
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: Readonly<{ params: { id: string } }>) {
   const startup_info = await getStartupInfo(params.id);
   if (!startup_info) return null;
   const is_founder = await isFounder(params.id);

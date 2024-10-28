@@ -15,7 +15,7 @@ import DeleteJobEntryButton from "../_components/DeleteJobEntryButton";
 import EditJobListing from "../_components/EditJobListing";
 import Link from "next/link";
 
-export default async function JobSection({ id }: { id: string }) {
+export default async function JobSection({ id }: Readonly<{ id: string }>) {
   const jobs = await getStartupJoblistings(id);
   const is_founder = await isFounder(id);
   return (

@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-nested-functions */
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -37,7 +38,7 @@ interface DirectoryProps<T extends Item> {
 export default function Directory<T extends Item>({
   items,
   filters = [], // Default to an empty array if no filters are provided
-}: DirectoryProps<T>) {
+}: Readonly<DirectoryProps<T>>) {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [filteredItems, setFilteredItems] = useState<T[]>(items);

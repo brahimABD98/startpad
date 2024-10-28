@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-misused-promises */
 "use client";
 import { insertJobListingSchema } from "@/server/db/schema";
 import type { selectJobListingSchema } from "@/server/db/schema";
@@ -29,9 +30,9 @@ import { updateJobListing } from "@/server/actions";
 
 export default function EditJobListing({
   initialData,
-}: {
+}: Readonly<{
   initialData: z.infer<typeof selectJobListingSchema>;
-}) {
+}>) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   type Inputs = z.infer<typeof insertJobListingSchema>;
   const form = useForm<Inputs>({

@@ -7,10 +7,10 @@ import DashboardNav from "@/app/_components/DashboardNav";
 export default async function RootLayout({
   children,
   params,
-}: {
+}: Readonly<{
   children: React.ReactNode;
   params: { id: string };
-}) {
+}>) {
   const startup_info = await getStartupInfo(params.id);
   if (!startup_info) return null;
   const logo = await getImageURL(startup_info.logo);

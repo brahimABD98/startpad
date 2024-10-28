@@ -15,7 +15,7 @@ export default function SettingsNavBar() {
   return (
     <nav
       className="grid gap-4 text-sm text-muted-foreground"
-      x-chunk="dashboard-04-chunk-0"
+      
     >
       {links.map((link) => (
         <Link

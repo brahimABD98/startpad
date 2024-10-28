@@ -6,9 +6,9 @@ import { redirect } from "next/navigation";
 
 export default async function Layout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const session = await getServerAuthSession();
   if (!session) return redirect("/signin");
   const image_url = await getImageURL(session?.user.image);

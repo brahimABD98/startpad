@@ -14,9 +14,9 @@ import { DisplayPostContent } from "./DisplayTextEditorContent";
 
 export async function DisplayAllPosts({
   startup,
-}: {
+}: Readonly<{
   startup: SelectStartups;
-}) {
+}>) {
   const posts = await getStartupPosts(startup);
 
   return (

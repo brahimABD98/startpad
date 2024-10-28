@@ -90,11 +90,11 @@ function TestimonialCard({
   quote,
   author,
   role,
-}: {
+}: Readonly<{
   quote: string;
   author: string;
   role: string;
-}) {
+}>) {
   return (
     <Card>
       <CardContent className="p-6">
@@ -131,7 +131,7 @@ function TestimonialsSection() {
   );
 }
 
-function StatCard({ value, label }: { value: string; label: string }) {
+function StatCard({ value, label }: Readonly<{ value: string; label: string }>) {
   return (
     <div>
       <h3 className="mb-2 text-4xl font-bold">{value}</h3>
@@ -159,11 +159,11 @@ function ProcessStep({
   number,
   title,
   description,
-}: {
+}: Readonly<{
   number: string;
   title: string;
   description: string;
-}) {
+}>) {
   return (
     <div className="flex flex-col items-center text-center">
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-500 text-white">

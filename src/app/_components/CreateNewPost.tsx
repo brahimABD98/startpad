@@ -20,7 +20,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { insertPostSchema } from "@/server/db/schema";
-export default function CreateNewPost({ startup_id }: { startup_id: string }) {
+export default function CreateNewPost({ startup_id }: Readonly<{ startup_id: string }>) {
   const [content, setContent] = useState("");
 
   type Inputs = z.infer<typeof insertPostSchema>;

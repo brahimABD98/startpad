@@ -30,116 +30,110 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-async function DownloadDocumentButton({ filename }: { filename: string }) {
+async function DownloadDocumentButton({ filename }: Readonly<{ filename: string }>) {
   const file_url = await generateDocumentUrl(filename);
   return (
     <Button className="w-1/4">
-        <Download className="h-5 w-5" />
-        <a href={file_url}>
-          <span>Download</span>
-        </a>
-      </Button>
+      <Download className="h-5 w-5" />
+      <a href={file_url}>
+        <span>Download</span>
+      </a>
+    </Button>
   );
 }
 async function CandidateList({
   startup_id,
   job_id,
-}: {
+}: Readonly<{
   startup_id: string;
   job_id: string;
-}) {
+}>) {
   const is_founder = await isFounder(startup_id);
+  if (!is_founder) return null;
   const job_applications = await getjobwithCandidates(startup_id, job_id);
-
   return (
-    <>
-      {is_founder && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Candidates</CardTitle>
-            <CardDescription>
-              Potential matches for this position
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-4">
-              {job_applications.map((job_application) => (
-                <li
-                  key={job_application.id}
-                  className="flex items-center space-x-4"
-                >
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="h-auto w-full justify-start p-0"
-                      >
-                        <div className="flex w-full items-center space-x-4">
-                          <Avatar>
-                            <DisplayServerImages
-                              src={job_application.user.image}
-                              alt={job_application.user.name ?? "user"}
-                            />
-                            <AvatarFallback>
-                              {(job_application.user.name ?? "U")
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="text-left">
-                            <p className="font-medium">
-                              {job_application.user.name}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {job_application.created_at.toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[625px]">
-                      <DialogHeader>
-                        <DialogTitle>{job_application.user.name}</DialogTitle>
-                        <DialogDescription>
-                          <p>email:{job_application.user.email}</p>
-                          <p>
-                            sumbited:
-                            {job_application.created_at.toDateString()}
-                          </p>
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <Label htmlFor="coverLetter">Cover Letter</Label>
-                          {job_application.coverLetter?.fileName ? (
-                            <DownloadDocumentButton
-                              filename={job_application.coverLetter.fileName}
-                            />
-                          ) : (
-                            "No cover letter uploaded"
-                          )}
-                        </div>
-                        <div className="grid gap-2">
-                          <Label htmlFor="resume">Resume</Label>
-                          {job_application.resume?.fileName ? (
-                            <DownloadDocumentButton
-                              filename={job_application.resume?.fileName}
-                            />
-                          ) : (
-                            "No resume uploaded"
-                          )}
-                        </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Candidates</CardTitle>
+        <CardDescription>Potential matches for this position</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-4">
+          {job_applications.map((job_application) => (
+            <li
+              key={job_application.id}
+              className="flex items-center space-x-4"
+            >
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="h-auto w-full justify-start p-0"
+                  >
+                    <div className="flex w-full items-center space-x-4">
+                      <Avatar>
+                        <DisplayServerImages
+                          src={job_application.user.image}
+                          alt={job_application.user.name ?? "user"}
+                        />
+                        <AvatarFallback>
+                          {(job_application.user.name ?? "U")
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="text-left">
+                        <p className="font-medium">
+                          {job_application.user.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {job_application.created_at.toLocaleString()}
+                        </p>
                       </div>
-                    </DialogContent>
-                  </Dialog>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
-      )}
-    </>
+                    </div>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[625px]">
+                  <DialogHeader>
+                    <DialogTitle>{job_application.user.name}</DialogTitle>
+                    <DialogDescription>
+                      <p>email:{job_application.user.email}</p>
+                      <p>
+                        sumbited:
+                        {job_application.created_at.toDateString()}
+                      </p>
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="coverLetter">Cover Letter</Label>
+                      {job_application.coverLetter?.fileName ? (
+                        <DownloadDocumentButton
+                          filename={job_application.coverLetter.fileName}
+                        />
+                      ) : (
+                        "No cover letter uploaded"
+                      )}
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="resume">Resume</Label>
+                      {job_application.resume?.fileName ? (
+                        <DownloadDocumentButton
+                          filename={job_application.resume?.fileName}
+                        />
+                      ) : (
+                        "No resume uploaded"
+                      )}
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+    </Card>
   );
 }
 export default async function page({ params }: { params: { id: string } }) {

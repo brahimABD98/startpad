@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/todo-tag */
 "use client";
 import Avatar from "boring-avatars";
 
@@ -27,8 +28,9 @@ function SubmitButton() {
     </Button>
   );
 }
+
 //TODO : Refactor to React Hook Form
-export default function UpdateProfileForm({ user }: { user: SelectUser }) {
+export default function UpdateProfileForm({ user }: Readonly<{ user: SelectUser }>) {
   const [state, formAction] = useFormState(updateProfile, initialState);
   const inputFileRef = useRef<HTMLInputElement>(null);
   const profilePreviewRef = useRef<HTMLImageElement>(null);
