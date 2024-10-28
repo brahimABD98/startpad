@@ -381,6 +381,7 @@ export const insertPostSchema = createInsertSchema(posts, {
   is_pinned: z.coerce.boolean().default(false),
   content: z.string().refine(
     (content) => {
+      // eslint-disable-next-line sonarjs/slow-regex
       const regex = /(<([^>]+)>)/gi;
       const clean_content = content.replace(regex, "");
       return !!clean_content.trim().length;

@@ -19,8 +19,7 @@ export default async function JobSection({ id }: { id: string }) {
   const jobs = await getStartupJoblistings(id);
   const is_founder = await isFounder(id);
   return (
-    <>
-      <section className="bg-gray-50 py-12">
+    <section className="bg-gray-50 py-12">
         <div className="container mx-auto px-4">
           <div className="mb-8 flex items-center justify-between">
             <h2 className="text-3xl font-bold">Open Positions</h2>
@@ -72,6 +71,5 @@ export default async function JobSection({ id }: { id: string }) {
           </div>
         </div>
       </section>
-    </>
   );
 }

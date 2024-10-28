@@ -8,13 +8,14 @@ import {
 } from "@/components/ui/card";
 import { getLatestConferences } from "@/server/queries";
 import { Calendar, Video } from "lucide-react";
+import Link from "next/link";
 import React from "react";
 
 export default async function DisplayConferences({
   startup_id,
-}: {
+}: Readonly<{
   startup_id: string;
-}) {
+}>) {
   const conferences = await getLatestConferences(startup_id);
 
   return (
@@ -43,7 +44,11 @@ export default async function DisplayConferences({
               </div>
             </CardContent>
             <CardContent className="pt-0">
-              <Button className="w-full">Join Conference</Button>
+              <Button className="w-full">
+                <Link href={`/conference/${conference.id}`} prefetch={false}>
+                  Join Conference
+                </Link>
+              </Button>
             </CardContent>
           </Card>
         ))}

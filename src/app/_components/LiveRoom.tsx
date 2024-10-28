@@ -8,11 +8,13 @@ import {
   RoomAudioRenderer,
   useTracks,
 } from "@livekit/components-react";
+import { Chat } from "@livekit/components-react";
+import { LayoutContextProvider } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { Track } from "livekit-client";
 import type { LiveKitRoomProps } from "@livekit/components-react";
 import { env } from "@/env";
-interface props
+interface Props
   extends Omit<
     LiveKitRoomProps,
     "token" | "video" | "audio" | "serverUrl" | "data-lk-theme"
@@ -29,9 +31,9 @@ export function LiveRoom({
   audio = true,
   serverUrl = env.NEXT_PUBLIC_LIVEKIT_URL,
   ...props
-}: props) {
+}: Readonly<Props>) {
   return (
-    <>
+    <LayoutContextProvider>
       <LiveKitRoom
         video={video}
         audio={audio}
@@ -39,13 +41,17 @@ export function LiveRoom({
         serverUrl={serverUrl}
         {...props}
         style={{ height: "100dvh" }}
+        className="flex flex-row"
         data-lk-theme="default"
       >
-        <MyVideoConference />
-        <RoomAudioRenderer />
-        <ControlBar />
+        <div className="flex-1">
+          <MyVideoConference />
+          <RoomAudioRenderer />
+          <ControlBar controls={{ chat: true }} />
+        </div>
+        <Chat />
       </LiveKitRoom>
-    </>
+    </LayoutContextProvider>
   );
 }
 
@@ -64,8 +70,6 @@ function MyVideoConference() {
       tracks={tracks}
       style={{ height: "calc(100vh - var(--lk-control-bar-height))" }}
     >
-      {/* The GridLayout accepts zero or one child. The child is used
-      as a template to render all passed in tracks. */}
       <ParticipantTile />
     </GridLayout>
   );

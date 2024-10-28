@@ -13,14 +13,12 @@ const TextEditor = ({ setContent, content }: TextEditorProps) => {
   const quillRef: React.LegacyRef<ReactQuill> = useRef(null);
 
   return (
-    <>
-      <ReactQuill
+    <ReactQuill
         ref={quillRef}
         theme="snow"
         onChange={setContent}
         value={content}
       />
-    </>
   );
 };
 

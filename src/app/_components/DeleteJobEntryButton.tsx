@@ -4,7 +4,7 @@ import { deleteJobListing } from "@/server/actions";
 import { Trash2 } from "lucide-react";
 import React from "react";
 import { useFormStatus } from "react-dom";
-function Submit({ job_title }: { job_title: string }) {
+function Submit({ job_title }: Readonly<{ job_title: string }>) {
   const { pending } = useFormStatus();
   return (
     <Button
@@ -23,11 +23,11 @@ export default function DeleteJobEntryButton({
   job_id,
   startup_id,
   job_title,
-}: {
+}: Readonly<{
   job_id: string;
   startup_id: string;
   job_title: string;
-}) {
+}>) {
   return (
     <form action={deleteJobListing}>
       <input hidden type=" text" name="startup_id" value={startup_id} />

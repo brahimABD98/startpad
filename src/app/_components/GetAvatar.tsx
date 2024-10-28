@@ -19,8 +19,7 @@ export default async function DisplayAvatar({
 }) {
   const image = await getImageURL(src);
   return (
-    <>
-      <Av>
+    <Av>
         <AvatarImage
           src={image}
           width={width ?? 40}
@@ -38,6 +37,5 @@ export default async function DisplayAvatar({
           </AvatarFallback>
         </AvatarFallback>
       </Av>
-    </>
   );
 }

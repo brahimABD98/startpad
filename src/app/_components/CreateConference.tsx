@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-misused-promises */
 "use client";
 import {
   Dialog,
@@ -9,7 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import React, { useEffect } from "react";
+import React from "react";
 import {
   Form,
   FormControl,
@@ -29,9 +30,9 @@ import { createConfernence } from "@/server/actions";
 import { Textarea } from "@/components/ui/textarea";
 export default function CreateConfernence({
   startup_id,
-}: {
+}: Readonly<{
   startup_id: string;
-}) {
+}>) {
   type Inputs = z.infer<typeof insertConferenceSchema>;
 
   const form = useForm<Inputs>({
@@ -45,89 +46,87 @@ export default function CreateConfernence({
   };
   const { formState } = form;
   return (
-    <>
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button variant="default" className="w-full">
-            Create Conference
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>New Conference</DialogTitle>
-          </DialogHeader>
-          <DialogDescription>
-            Create a new conference and invite your team members.
-          </DialogDescription>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField
-                name="name"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        placeholder="Please Enter a conference Name"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        {...field}
-                        placeholder="Please Enter a conference description"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="startup_id"
-                render={({ field }) => (
-                  <FormItem hidden>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="default" className="w-full">
+          Create Conference
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>New Conference</DialogTitle>
+        </DialogHeader>
+        <DialogDescription>
+          Create a new conference and invite your team members.
+        </DialogDescription>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <FormField
+              name="name"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Please Enter a conference Name"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      placeholder="Please Enter a conference description"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="startup_id"
+              render={({ field }) => (
+                <FormItem hidden>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Start Date</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="datetime-local" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="startDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Date</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="datetime-local" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <DialogFooter className="py-4">
-                <Button disabled={formState.isSubmitting} type="submit">
-                  Save changes
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-    </>
+            <DialogFooter className="py-4">
+              <Button disabled={formState.isSubmitting} type="submit">
+                Save changes
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -92,9 +92,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             </TabsContent>
             <TabsContent value="conference">
               {is_founder && (
-                <>
-                  <CreateConference startup_id={params.id} />
-                </>
+                <CreateConference startup_id={params.id} />
               )}
               <Suspense fallback={<div>Loading conferences...</div>}>
                 <DisplayConferences startup_id={params.id} />

@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-misused-promises */
 "use client";
 import { Button } from "@/components/ui/button";
 import { DialogHeader } from "@/components/ui/dialog";
@@ -26,7 +27,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-export default function CreateNewListing({ id }: { id: string }) {
+export default function CreateNewListing({ id }: Readonly<{ id: string }>) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   type Inputs = z.infer<typeof insertJobListingSchema>;
   const form = useForm<Inputs>({

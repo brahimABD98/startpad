@@ -5,13 +5,11 @@ import Directory from "../_components/Directory";
 export default async function page() {
   const startups = await db.query.startups.findMany();
   return (
-    <>
-      <main>
+    <main>
         <Header />
         <section>
           <Directory items={startups} />
         </section>
       </main>
-    </>
   );
 }

@@ -33,14 +33,12 @@ import { Label } from "@/components/ui/label";
 async function DownloadDocumentButton({ filename }: { filename: string }) {
   const file_url = await generateDocumentUrl(filename);
   return (
-    <>
-      <Button className="w-1/4">
+    <Button className="w-1/4">
         <Download className="h-5 w-5" />
         <a href={file_url}>
           <span>Download</span>
         </a>
       </Button>
-    </>
   );
 }
 async function CandidateList({

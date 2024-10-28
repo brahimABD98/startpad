@@ -126,8 +126,7 @@ export default async function Page() {
                 </CardHeader>
                 <CardContent>
                   {startups?.length === 0 && (
-                    <>
-                      <div className="m-4 flex flex-1 items-center justify-center rounded-lg border border-dashed p-4 shadow-sm">
+                    <div className="m-4 flex flex-1 items-center justify-center rounded-lg border border-dashed p-4 shadow-sm">
                         <div className="flex flex-col items-center gap-1 text-center">
                           <h3 className="text-2xl font-bold tracking-tight">
                             You have no startups
@@ -138,11 +137,9 @@ export default async function Page() {
                           <AddStartup />
                         </div>
                       </div>
-                    </>
                   )}
                   {startups?.map((startup) => (
-                    <>
-                      <Card key={startup.id} className="lg:w-1/4">
+                    <Card key={startup.id} className="lg:w-1/4">
                         <CardHeader className="flex flex-row items-center gap-4 p-4">
                           <DisplayServerImages
                             height={48}
@@ -164,7 +161,6 @@ export default async function Page() {
                           </Link>
                         </CardHeader>
                       </Card>
-                    </>
                   ))}
                 </CardContent>
                 <CardFooter></CardFooter>

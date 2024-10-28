@@ -41,11 +41,11 @@ function FeatureCard({
   icon: Icon,
   title,
   description,
-}: {
+}: Readonly<{
   icon: LucideIcon;
   title: string;
   description: string;
-}) {
+}>) {
   return (
     <Card>
       <CardContent className="flex flex-col items-center space-y-4 p-6 text-center">

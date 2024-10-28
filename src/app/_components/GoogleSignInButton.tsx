@@ -7,8 +7,7 @@ import React from "react";
 
 export default function GoogleSignInButton() {
   return (
-    <>
-      <Button
+    <Button
         variant="outline"
         onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
         className="w-full"
@@ -16,6 +15,5 @@ export default function GoogleSignInButton() {
         <FcGoogle className="mr-2 h-4 w-4" />
         Signin with Google
       </Button>
-    </>
   );
 }

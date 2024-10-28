@@ -5,7 +5,7 @@ import { getServerAuthSession } from "./auth";
 import { db } from "./db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import {  saveFileInBucket } from "../lib/minio";
+import { saveFileInBucket } from "../lib/minio";
 import { AccessToken } from "livekit-server-sdk";
 import { env } from "@/env";
 import {
@@ -104,7 +104,8 @@ export async function updateProfile(
         console.log(e);
       });
   } catch (error) {
-    return { message: "Error updating profile" };
+    console.log("update profile error", error);
+    throw new Error("Error updating profile");
   }
   revalidatePath("/dashboard/settings");
   redirect("/dashboard/settings/");
@@ -121,7 +122,8 @@ export async function deleteProfile() {
         console.log(e);
       });
   } catch (error) {
-    return { message: "Error deleting profile" };
+    console.log("delete profile error", error);
+    throw new Error("Error deleting profile");
   }
   revalidatePath("/dashboard/settings");
   redirect("/");
@@ -172,7 +174,7 @@ export async function deleteJobListing(data: FormData) {
   const job_id = data.get("job_id")?.toString() ?? "";
 
   const is_founder = await isFounder(startup_id);
-  if (!is_founder) throw { message: "Unauthorized" };
+  if (!is_founder) throw new Error("Unauthorized");
   await db
     .delete(job_listings)
     .where(

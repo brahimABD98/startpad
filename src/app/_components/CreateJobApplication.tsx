@@ -1,3 +1,4 @@
+/* eslint-disable sonarjs/no-misused-promises */
 "use client";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -29,11 +30,11 @@ function JobApplication({
   handleCloseDialog,
   user_id,
   job_id,
-}: {
+}: Readonly<{
   handleCloseDialog: () => void;
   user_id: string;
   job_id: string;
-}) {
+}>) {
   type Inputs = z.infer<typeof insertJobApplicationSchema>;
   const form = useForm<Inputs>({
     resolver: zodResolver(insertJobApplicationSchema),
@@ -60,8 +61,7 @@ function JobApplication({
     setValue("job_id", job_id);
   }, [user_id, job_id, setValue]);
   return (
-    <>
-      <Form {...form}>
+    <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <FormField
             control={form.control}
@@ -110,7 +110,6 @@ function JobApplication({
           </Button>
         </form>
       </Form>
-    </>
   );
 }
 
@@ -118,11 +117,11 @@ export default function CreateJobApplication({
   job_id,
   job_title,
   user_id,
-}: {
+}: Readonly<{
   job_id: string;
   job_title: string;
   user_id: string;
-}) {
+}>) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const handleCloseDialog = () => setIsDialogOpen(false);
   return (

@@ -13,8 +13,7 @@ import {
 
 const Navbar = () => {
   return (
-    <>
-      <NavigationMenu>
+    <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
             <Link href="/docs" legacyBehavior passHref>
@@ -38,7 +37,6 @@ const Navbar = () => {
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-    </>
   );
 };
 

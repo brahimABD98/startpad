@@ -25,8 +25,7 @@ export default async function page() {
     userData = { ...userData, image: url };
   }
   return (
-    <>
-      <div>
+    <div>
         <Card x-chunk="dashboard-04-chunk-1">
           <CardHeader>
             <CardTitle>Profile</CardTitle>
@@ -37,6 +36,5 @@ export default async function page() {
           {userData && <UpdateProfileForm user={userData} />}
         </Card>
       </div>
-    </>
   );
 }
