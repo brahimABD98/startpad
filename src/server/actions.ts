@@ -361,11 +361,19 @@ export async function generateParticiaptionToken(roomid: string) {
     where: eq(conferences.id, roomid),
   });
   if (!room) throw new Error("Room not found");
+
   const token = new AccessToken(env.LIVEKIT_API_KEY, env.LIVEKIT_API_SECRET, {
     identity: session.user.id,
     ttl: "20m",
   });
-  token.addGrant({ roomJoin: true, room: roomid });
+
+  const is_founder = await isFounder(room.startup_id);
+
+  if (is_founder) {
+    token.addGrant({ roomJoin: true, room: roomid });
+  }
+
+  token.addGrant({ roomJoin: true, room: roomid, canPublish: false });
   return await token.toJwt();
 }
 
