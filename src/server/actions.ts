@@ -367,14 +367,15 @@ export async function generateParticiaptionToken(roomid: string) {
     ttl: "20m",
   });
 
+  token.addGrant({ roomJoin: true, room: roomid, canPublish: false,canPublishData:true });
+
   const is_founder = await isFounder(room.startup_id);
 
   if (is_founder) {
-    token.addGrant({ roomJoin: true, room: roomid });
+    token.addGrant({ roomJoin: true, room: roomid, canPublish: true });
   }
 
-  token.addGrant({ roomJoin: true, room: roomid, canPublish: false });
-  return await token.toJwt();
+  return token.toJwt();
 }
 
 enum fileUploadType {
