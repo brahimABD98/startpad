@@ -18,6 +18,15 @@ export async function getUserStartups() {
   return startups;
 }
 
+export async function getJobPostings() {
+  return db.query.job_listings.findMany({
+    with: {
+      startup: true,
+    },
+    orderBy: (model, { desc }) => [desc(model.created_at)],
+  });
+}
+
 export async function getUserData() {
   const session = await getServerAuthSession();
 
@@ -89,7 +98,6 @@ export async function getUserWithStartups() {
       startups: true,
     },
   });
-
 }
 export async function getImageURL(image: string | null | undefined) {
   if (!image) return;

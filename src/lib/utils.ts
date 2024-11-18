@@ -1,6 +1,12 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { customAlphabet } from "nanoid";
+import * as schema from "@/server/db/schema";
+import {
+  ExtractTablesWithRelations,
+  DBQueryConfig,
+  BuildQueryResult,
+} from "drizzle-orm";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -76,3 +82,18 @@ export const createAPIFormMethod: CreateAPIFormMethod = (opts) => (input) => {
       })
   );
 };
+
+type Schema = typeof schema;
+type TSchema = ExtractTablesWithRelations<Schema>;
+
+export type IncludeRelation<TableName extends keyof TSchema> = DBQueryConfig<
+  "one" | "many",
+  boolean,
+  TSchema,
+  TSchema[TableName]
+>["with"];
+
+export type InferResultType<
+  TableName extends keyof TSchema,
+  With extends IncludeRelation<TableName>,
+> = BuildQueryResult<TSchema, TSchema[TableName], { with: With }>;

@@ -31,7 +31,7 @@ export async function Header() {
         <Button variant="ghost">
           <Link
             className="text-sm font-medium underline-offset-4 hover:underline"
-            href="#"
+            href="/job"
           >
             Jobs
           </Link>
