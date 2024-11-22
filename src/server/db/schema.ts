@@ -43,6 +43,46 @@ export const job_listings = createTable("job_listings", {
     .references(() => startups.id)
     .notNull(),
 });
+export const followed_startups = createTable("followed_startups", {
+  id: varchar("id", { length: 18 })
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  user_id: varchar("user_id", { length: 18 })
+    .references(() => users.id)
+    .notNull(),
+  startup_id: varchar("startup_id", { length: 18 })
+    .references(() => startups.id)
+    .notNull(),
+  created_at: timestamp("created_at"),
+});
+export const post_comment = createTable("post_comment", {
+  id: varchar("id", { length: 18 })
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  post_id: varchar("post_id", { length: 18 })
+    .references(() => posts.id)
+    .notNull(),
+  user_id: varchar("user_id", { length: 18 })
+    .references(() => users.id)
+    .notNull(),
+  content: text("content").notNull(),
+  created_at: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  moderation_id: varchar("moderation_id", { length: 42 }),
+});
+export const post_likes = createTable("post_likes", {
+  id: varchar("id", { length: 18 })
+    .primaryKey()
+    .$defaultFn(() => nanoid()),
+  post_id: varchar("post_id", { length: 18 })
+    .references(() => posts.id)
+    .notNull(),
+  user_id: varchar("user_id", { length: 18 }),
+  created_at: timestamp("created_at")
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+});
 
 export const job_applications = createTable("job_application", {
   id: varchar("id", { length: 18 })
@@ -263,6 +303,8 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
     fields: [posts.startup_id],
     references: [startups.id],
   }),
+  postsLikes: many(post_likes),
+  postComments: many(post_comment),
 }));
 
 export const jobListingsRelations = relations(
@@ -279,11 +321,26 @@ export const jobListingsRelations = relations(
 export const startupsRelations = relations(startups, ({ one, many }) => ({
   founder: one(users, { fields: [startups.founderId], references: [users.id] }),
   jobListings: many(job_listings),
+  followedBy: many(followed_startups),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
   user: one(users, { fields: [sessions.userId], references: [users.id] }),
 }));
+
+export const folllowedStartupsRelations = relations(
+  followed_startups,
+  ({ one }) => ({
+    startup: one(startups, {
+      fields: [followed_startups.startup_id],
+      references: [startups.id],
+    }),
+    user: one(users, {
+      fields: [followed_startups.user_id],
+      references: [users.id],
+    }),
+  }),
+);
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),
@@ -291,6 +348,17 @@ export const usersRelations = relations(users, ({ many }) => ({
   posts: many(posts),
   conferenceSpeakers: many(conferenceSpeakers),
   jobApplications: many(job_applications),
+  postComments: many(post_comment),
+  postLikes: many(post_likes),
+  followedStartups: many(followed_startups),
+}));
+export const postCommentsRelations = relations(post_comment, ({ one }) => ({
+  post: one(posts, { fields: [post_comment.post_id], references: [posts.id] }),
+  user: one(users, { fields: [post_comment.user_id], references: [users.id] }),
+}));
+export const postLikesRelations = relations(post_likes, ({ one }) => ({
+  post: one(posts, { fields: [post_likes.post_id], references: [posts.id] }),
+  user: one(users, { fields: [post_likes.user_id], references: [users.id] }),
 }));
 
 export const accountsRelations = relations(accounts, ({ one }) => ({

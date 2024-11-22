@@ -32,6 +32,7 @@ import {
   Building,
 } from "lucide-react";
 import type { InferResultType } from "@/lib/utils";
+import Link from "next/link";
 
 const jobTypes = ["Full-time", "Part-time", "Contract"];
 const locations = ["San Francisco, CA", "New York, NY", "Remote"];
@@ -218,7 +219,9 @@ export default function JobListings({
                 </CardContent>
                 <CardFooter className="flex items-center justify-between">
                   <Badge variant="secondary">ID: {job.id.slice(0, 8)}</Badge>
-                  <Button>Apply Now</Button>
+                  <Link href={`/job/${job.id}`}>
+                    <Button>Apply Now</Button>
+                  </Link>
                 </CardFooter>
               </Card>
             ))}
