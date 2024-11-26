@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/no-misused-promises */
 "use client";
 import { insertJobListingSchema } from "@/server/db/schema";
 import type { selectJobListingSchema } from "@/server/db/schema";

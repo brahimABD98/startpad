@@ -8,9 +8,11 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { getStartupPosts } from "@/server/queries";
-import { Heart, InboxIcon, Share } from "lucide-react";
+import { Heart, Share } from "lucide-react";
 import type { SelectStartups } from "@/server/db/schema";
 import { DisplayPostContent } from "./DisplayTextEditorContent";
+import { likePost } from "@/server/actions";
+import CommentList from "../comment/CommentList";
 
 export async function DisplayAllPosts({
   startup,
@@ -45,14 +47,21 @@ export async function DisplayAllPosts({
           </CardContent>
           <CardFooter>
             <div className="flex items-center space-x-4">
-              <Button size="icon" variant="ghost">
-                <Heart className="h-5 w-5" />
-                <span className="sr-only">Like</span>
-              </Button>
-              <Button size="icon" variant="ghost">
+              <form action={likePost}>
+                <input type="hidden" name="postId" value={post.id} />
+                <Button type="submit" size="icon" variant="ghost">
+                  <p className="mx-1">
+                    {post.postsLikes.length ? post.postsLikes.length : ""}
+                  </p>
+                  <Heart className="h-5 w-5" />
+                  <span className="sr-only">Like</span>
+                </Button>
+              </form>
+              {/* <Button size="icon" variant="ghost">
                 <InboxIcon className="h-5 w-5" />
                 <span className="sr-only">Comment</span>
-              </Button>
+              </Button> */}
+              <CommentList post_id={post.id} />
               <Button size="icon" variant="ghost">
                 <Share className="h-5 w-5" />
                 <span className="sr-only">Share</span>

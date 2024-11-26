@@ -17,12 +17,11 @@ const config = {
   parserOptions: {
     project: path.join(__dirname, "./tsconfig.json"),
   },
-  plugins: ["@typescript-eslint", "drizzle", "sonarjs"],
+  plugins: ["@typescript-eslint", "drizzle"],
   extends: [
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended-type-checked",
     "plugin:@typescript-eslint/stylistic-type-checked",
-    "plugin:sonarjs/recommended-legacy",
   ],
   rules: {
     semi: ["warn"],

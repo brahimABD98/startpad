@@ -47,7 +47,7 @@ export const followed_startups = createTable("followed_startups", {
   id: varchar("id", { length: 18 })
     .primaryKey()
     .$defaultFn(() => nanoid()),
-  user_id: varchar("user_id", { length: 18 })
+  user_id: varchar("user_id", { length: 255 })
     .references(() => users.id)
     .notNull(),
   startup_id: varchar("startup_id", { length: 18 })
@@ -62,7 +62,7 @@ export const post_comment = createTable("post_comment", {
   post_id: varchar("post_id", { length: 18 })
     .references(() => posts.id)
     .notNull(),
-  user_id: varchar("user_id", { length: 18 })
+  user_id: varchar("user_id", { length: 255 })
     .references(() => users.id)
     .notNull(),
   content: text("content").notNull(),
@@ -78,7 +78,7 @@ export const post_likes = createTable("post_likes", {
   post_id: varchar("post_id", { length: 18 })
     .references(() => posts.id)
     .notNull(),
-  user_id: varchar("user_id", { length: 18 }),
+  user_id: varchar("user_id", { length: 255 }),
   created_at: timestamp("created_at")
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -430,6 +430,11 @@ export const insertStartupSchema = createInsertSchema(startups, {
     .default(() => new Date().toISOString()),
 }).omit({ founderId: true });
 export const insertConferenceSchema = createInsertSchema(conferences);
+export const insertPostCommentSchema = createInsertSchema(post_comment).omit({
+  moderation_id: true,
+  created_at: true,
+  id: true,
+});
 export const selectJobListingSchema = createSelectSchema(job_listings);
 export const uuidSchema = z.string().uuid();
 export const insertJobListingSchema = createInsertSchema(job_listings).omit({
@@ -449,7 +454,6 @@ export const insertPostSchema = createInsertSchema(posts, {
   is_pinned: z.coerce.boolean().default(false),
   content: z.string().refine(
     (content) => {
-      // eslint-disable-next-line sonarjs/slow-regex
       const regex = /(<([^>]+)>)/gi;
       const clean_content = content.replace(regex, "");
       return !!clean_content.trim().length;

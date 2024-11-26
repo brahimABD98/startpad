@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/todo-tag */
 "use client";
 import Avatar from "boring-avatars";
 

@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/no-misused-promises */
 "use client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogHeader } from "@/components/ui/dialog";

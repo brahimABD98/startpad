@@ -4,7 +4,7 @@ import { createAPIFormMethod, isValidURL } from "@/lib/utils";
 import { getServerAuthSession } from "./auth";
 import { eq, and, or, inArray } from "drizzle-orm";
 import { env } from "@/env";
-import { startups, posts, postimages, files } from "./db/schema";
+import { startups, posts, postimages, files, post_comment } from "./db/schema";
 import type { SelectPosts, SelectStartups } from "./db/schema";
 import { createPresignedUrlToDownload } from "@/lib/minio";
 export async function getUserStartups() {
@@ -109,8 +109,19 @@ export async function getImageURL(image: string | null | undefined) {
       });
 }
 
+export async function getPostComments(post_id: string) {
+  return db.query.post_comment.findMany({
+    where: eq(posts.id, post_id),
+    with: { user: true, post: true },
+  });
+}
+export async function getPostById(post_id: string) {
+  return db.query.posts.findFirst({
+    where: eq(posts.id, post_id),
+  });
+}
 export async function getStartupPosts(startup: SelectStartups) {
-  return await db.query.posts.findMany({
+  return db.query.posts.findMany({
     where: or(
       eq(posts.startup_id, startup.id),
       eq(posts.user_id, startup.founderId),
@@ -118,6 +129,8 @@ export async function getStartupPosts(startup: SelectStartups) {
     with: {
       createdByUser: true,
       createdByStartup: true,
+      postsLikes: true,
+      postComments: true,
     },
     orderBy: (model, { desc }) => [desc(model.createdAt)],
   });

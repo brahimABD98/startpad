@@ -23,6 +23,9 @@ import {
   insertJobListingSchema,
   job_listings,
   insertJobApplicationSchema,
+  post_likes,
+  insertPostCommentSchema,
+  post_comment,
 } from "./db/schema";
 import {
   getUserStartups,
@@ -314,6 +317,45 @@ export async function createPost(formData: FormData) {
   return { id: new_post[0]?.id };
 }
 
+export async function likePost(formData: FormData) {
+  const postId = formData.get("postId")?.toString();
+  if (!postId) throw new Error("No post id provided");
+  const session = await getServerAuthSession();
+  if (!session) throw new Error("Unauthorized");
+  const post_like = await db.query.post_likes.findFirst({
+    where: and(
+      eq(post_likes?.post_id, postId),
+      eq(post_likes.user_id, session.user.id),
+    ),
+  });
+  if (post_like) {
+    console.log("hello please delete me ");
+    console.log(post_like.id);
+    await db.delete(post_likes).where(eq(post_likes.id, post_like.id));
+    revalidatePath(`/post/${post_like.id}`);
+    return;
+  }
+  await db.insert(post_likes).values({
+    post_id: postId,
+    user_id: session.user.id,
+  });
+
+  revalidatePath(`/post/${postId}`);
+}
+
+export async function addPostComment(
+  formData: z.infer<typeof insertPostCommentSchema>,
+) {
+  const data = insertPostCommentSchema.parse(formData);
+  if (!data) throw new Error("Invalid data");
+  await db.insert(post_comment).values({
+    user_id: data.user_id,
+    post_id: data.post_id,
+    content: data.content,
+  });
+  revalidatePath(`/post/${data.post_id}`);
+}
+
 export async function createStartup(formData: FormData) {
   const session = await getServerAuthSession();
 
@@ -367,7 +409,12 @@ export async function generateParticiaptionToken(roomid: string) {
     ttl: "20m",
   });
 
-  token.addGrant({ roomJoin: true, room: roomid, canPublish: false,canPublishData:true });
+  token.addGrant({
+    roomJoin: true,
+    room: roomid,
+    canPublish: false,
+    canPublishData: true,
+  });
 
   const is_founder = await isFounder(room.startup_id);
 
