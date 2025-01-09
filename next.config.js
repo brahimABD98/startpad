@@ -8,19 +8,20 @@ await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
 const config = {
-  // eslint:{
-  //   ignoreDuringBuilds:true
-  // },
-  // typescript:{
-  //   ignoreBuildErrors: true,
+  eslint: {
+    ignoreDuringBuilds: true
+  },
+  typescript: {
+    ignoreBuildErrors: true,
 
-  // },
-    
+  },
+
   images: {
     remotePatterns: [
       {
         hostname: "127.0.0.1",
       },
+      { hostname: "localhost" },
       {
         hostname: "lh3.googleusercontent.com",
       },

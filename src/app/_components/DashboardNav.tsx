@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { Input } from "@/components/ui/input";
 import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet";
 import {
   DropdownMenu,
@@ -12,8 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import {
+  CommandDialog,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+} from "@/components/ui/command";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   HelpCircleIcon,
   LogOut,
@@ -24,8 +30,34 @@ import {
   User,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { dashboardSearch } from "@/server/actions";
+import type { SelectStartups } from "@/server/db/schema";
+import { CommandLoading } from "cmdk";
 
 const DashboardNav = ({ logo }: { logo?: string }) => {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [searchResults, setSearchResults] = useState<SelectStartups[]>([]);
+  const handleSearch = async (text: string) => {
+    setLoading(true);
+    const results = await dashboardSearch(text);
+    if (results) setSearchResults([...results]);
+    setLoading(false);
+  };
+  console.log(searchResults);
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
+
   return (
     <header className="sticky top-0 flex h-16 w-full items-center gap-4 border-b bg-background px-4 md:px-6">
       <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
@@ -93,17 +125,40 @@ const DashboardNav = ({ logo }: { logo?: string }) => {
           </nav>
         </SheetContent>
       </Sheet>
-      <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-        <form className="ml-auto flex-1 sm:flex-initial">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search products..."
-              className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
+      <div className="flex w-full  justify-end gap-4  md:ml-auto md:gap-2 lg:gap-4">
+        <div>
+          <Button
+            variant="outline"
+            className="relative h-9 w-9 p-0 xl:h-10 xl:w-60 xl:justify-start xl:px-3 xl:py-2"
+            onClick={() => setOpen(true)}
+          >
+            <Search className="h-4 w-4 xl:mr-2" />
+            <span className="hidden xl:inline-flex">Search...</span>
+            <span className="sr-only">Search</span>
+            <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-6 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 xl:flex">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </Button>
+          <CommandDialog open={open} onOpenChange={setOpen}>
+            <CommandInput
+              onValueChange={handleSearch}
+              name="text"
+              placeholder="Type a command or search..."
             />
-          </div>
-        </form>
+            <CommandList>
+              {loading && <CommandLoading>loading ...</CommandLoading>}
+              <CommandSeparator />
+              <div>
+                {searchResults.map((result) => (
+                  <CommandItem key={result.founderId}>
+                    <span>{result.logo}</span>
+                  </CommandItem>
+                ))}
+              </div>
+            </CommandList>
+          </CommandDialog>
+        </div>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button

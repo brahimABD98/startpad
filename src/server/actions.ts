@@ -1,5 +1,5 @@
 "use server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getServerAuthSession } from "./auth";
 import { db } from "./db";
@@ -34,6 +34,23 @@ import {
   isFounder,
 } from "./queries";
 import { nanoid } from "nanoid";
+
+export async function dashboardSearch(text: string) {
+  if (!text) {
+    console.log("Search query is empty or invalid");
+    return [];
+  }
+  const sanitizedText = text.toString().trim();
+  console.log("sanitizedText", sanitizedText);
+  const search = await db
+    .select()
+    .from(startups)
+    .where(
+      sql`to_tsvector(name || ' ' || coalesce(description,'')) @@ websearch_to_tsquery(${sanitizedText}) `,
+    );
+  console.log("search", search);
+  return search;
+}
 
 export async function updateProfile(
   prevState: {
