@@ -4,7 +4,7 @@ import { createAPIFormMethod, isValidURL } from "@/lib/utils";
 import { getServerAuthSession } from "./auth";
 import { eq, and, or, inArray } from "drizzle-orm";
 import { env } from "@/env";
-import { startups, posts, postimages, files, post_comment } from "./db/schema";
+import { startups, posts, postimages, files } from "./db/schema";
 import type { SelectPosts, SelectStartups } from "./db/schema";
 import { createPresignedUrlToDownload } from "@/lib/minio";
 export async function getUserStartups() {
@@ -25,6 +25,17 @@ export async function getJobPostings() {
     },
     orderBy: (model, { desc }) => [desc(model.created_at)],
   });
+}
+
+export async function getUsersList() {
+  const user = await getUserData();
+  if (!user) return null;
+  if (user.role !== "admin") return null;
+  return db.query.users.findMany();
+}
+export async function isAdmin() {
+  const user = await getUserData();
+  return user?.role === "admin";
 }
 
 export async function getUserData() {

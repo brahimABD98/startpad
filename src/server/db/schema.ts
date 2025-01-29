@@ -200,6 +200,7 @@ export const users = createTable("user", {
   }).default(sql`CURRENT_TIMESTAMP`),
   image: varchar("image", { length: 255 }),
   phoneNumber: varchar("phoneNumber", { length: 255 }),
+  role: varchar("role", { length: 35 }).default("user"),
 });
 
 export const accounts = createTable(
