@@ -1,28 +1,56 @@
 "use server";
-import { v4 as uuidv4 } from "uuid";
-import { eq } from "drizzle-orm";
+import { and, eq, getTableColumns, sql } from "drizzle-orm";
 import { z } from "zod";
 import { getServerAuthSession } from "./auth";
 import { db } from "./db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { saveFileInBucket } from "../lib/minio";
-import { File } from "buffer";
-import { files, posts, startups, users } from "./db/schema";
-import { CreateNewPostSchema } from "@/lib/formSchema";
-const fileSchema = z.instanceof(File).refine(
-  (file) => {
-    return (
-      file.type.startsWith("image/") &&
-      file.size > 0 &&
-      file.size < 4 * 1024 * 1024
+import { AccessToken } from "livekit-server-sdk";
+import { env } from "@/env";
+import {
+  files,
+  posts,
+  startups,
+  users,
+  job_applications,
+  insertConferenceSchema,
+  conferences,
+  fileSchema,
+  insertStartupSchema,
+  insertPostSchema,
+  postimages,
+  insertJobListingSchema,
+  job_listings,
+  insertJobApplicationSchema,
+  post_likes,
+  insertPostCommentSchema,
+  post_comment,
+} from "./db/schema";
+import {
+  getUserStartups,
+  image_moderation_request,
+  getFileByFilename,
+  isFounder,
+} from "./queries";
+import { nanoid } from "nanoid";
+
+export async function dashboardSearch(text: string) {
+  if (!text) {
+    console.log("Search query is empty or invalid");
+    return [];
+  }
+  const sanitizedText = text.toString().trim();
+  console.log("sanitizedText", sanitizedText);
+  const search = await db
+    .select()
+    .from(startups)
+    .where(
+      sql`to_tsvector(name || ' ' || coalesce(description,'')) @@ websearch_to_tsquery(${sanitizedText}) `,
     );
-  },
-  {
-    message:
-      "File must be an image type and its size must be greater than 0 and less than 4 MB",
-  },
-);
+  console.log("search", search);
+  return search;
+}
 
 export async function updateProfile(
   prevState: {
@@ -52,12 +80,12 @@ export async function updateProfile(
 
   const data = parse.data;
 
-  const file_id = uuidv4();
+  const file_id = nanoid();
 
   const new_file = {
     id: file_id,
     originalName: data.image?.name ?? "default.png",
-    fileName: `${file_id}.${data.image?.type.split("/")[1]}` ?? "default.png",
+    fileName: `${file_id}.${data.image?.type.split("/")[1]}`,
     size: data.image?.size ?? 0,
     bucket: "startpad",
   };
@@ -96,11 +124,13 @@ export async function updateProfile(
         console.log(e);
       });
   } catch (error) {
-    return { message: "Error updating profile" };
+    console.log("update profile error", error);
+    throw new Error("Error updating profile");
   }
-  revalidatePath("/dashboard/settings/profile");
-  redirect("/dashboard/settings/profile");
+  revalidatePath("/dashboard/settings");
+  redirect("/dashboard/settings/");
 }
+
 export async function deleteProfile() {
   const session = await getServerAuthSession();
   if (!session) return { message: "Unauthorized" };
@@ -112,78 +142,266 @@ export async function deleteProfile() {
         console.log(e);
       });
   } catch (error) {
-    return { message: "Error deleting profile" };
+    console.log("delete profile error", error);
+    throw new Error("Error deleting profile");
   }
-  revalidatePath("/dashboard/settings/profile");
+  revalidatePath("/dashboard/settings");
   redirect("/");
 }
-const uuidSchema = z.string().uuid();
-export async function createPost(
-  formData: z.infer<typeof CreateNewPostSchema>,
-) {
-  const data = CreateNewPostSchema.parse(formData);
 
-  if (!data) throw new Error("Invalid form data");
-  const { data: uuid } = uuidSchema.safeParse(data.author_id);
-  if (uuid) {
-    const new_post = await db
-      .insert(posts)
-      .values({
-        title: data.title,
-        createdByUser: uuid,
-        content: data.postContent,
-        is_pinned: data.markpinned,
-      })
-      .returning({ id: posts.id });
-    revalidatePath("/dashboard/startup/[id]", "page");
-    return { id: new_post[0]?.id };
+export async function createJobListing(
+  formData: z.infer<typeof insertJobListingSchema>,
+) {
+  const {
+    title,
+    description,
+    location,
+    startup_id,
+    type,
+    responsabilities,
+    requirements,
+    payrange,
+  } = insertJobListingSchema.parse(formData);
+  const is_founder = await isFounder(startup_id);
+  if (!is_founder) return { message: "Unauthorized" };
+  await db.insert(job_listings).values({
+    title,
+    payrange,
+    responsabilities,
+    requirements,
+    description,
+    location,
+    startup_id,
+    type,
+  });
+  revalidatePath(`/startup/${startup_id}`);
+}
+
+export async function updateJobListing(
+  id: string,
+  formData: z.infer<typeof insertJobListingSchema>,
+) {
+  const data = insertJobListingSchema.parse(formData);
+  data.updated_at = new Date();
+
+  if (!data) throw new Error("Invalid data");
+  await db.update(job_listings).set(data).where(eq(job_listings.id, id));
+  revalidatePath(`/startup/${data.startup_id}`);
+}
+
+export async function deleteJobListing(data: FormData) {
+  const startup_id = data.get("startup_id")?.toString() ?? "";
+  const job_id = data.get("job_id")?.toString() ?? "";
+
+  const is_founder = await isFounder(startup_id);
+  if (!is_founder) throw new Error("Unauthorized");
+  await db
+    .delete(job_listings)
+    .where(
+      and(eq(job_listings.id, job_id), eq(job_listings.startup_id, startup_id)),
+    )
+    .catch((e) => {
+      console.log(e);
+    });
+
+  revalidatePath(`/`);
+}
+
+export async function createConfernence(
+  formData: z.infer<typeof insertConferenceSchema>,
+) {
+  const data = insertConferenceSchema.parse(formData);
+  if (!data) throw new Error("Invalid data");
+
+  const session = await getServerAuthSession();
+  if (!session) return { message: "Unauthorized" };
+
+  // check if data.createdby is in users.startups
+  const startup = await db.query.startups.findFirst({
+    where: and(
+      eq(startups.id, data.startup_id),
+      eq(startups.founderId, session?.user.id),
+    ),
+  });
+  if (!startup) return { message: "Unauthorized" };
+
+  const [new_conference] = await db
+    .insert(conferences)
+    .values({
+      startDate: data.startDate,
+      name: data.name,
+      description: data.description,
+      startup_id: startup.id,
+    })
+    .returning({ id: conferences.id });
+  redirect(`/conference/${new_conference?.id}`);
+}
+export async function addJobApplication(formData: FormData) {
+  console.log("Starting job application process");
+
+  const session = await getServerAuthSession();
+  const user = session?.user;
+  if (!user) {
+    console.error("No user session found");
+    return null;
   }
+
+  try {
+    const data = insertJobApplicationSchema.parse({
+      job_id: formData.get("job_id"),
+      user_id: user.id,
+      resume: formData.get("resume"),
+      cover_letter: formData.get("cover_letter"),
+    });
+
+    const job = await db.query.job_listings.findFirst({
+      where: eq(job_listings.id, data.job_id),
+    });
+    if (!job) {
+      console.error("Job not found");
+      return null;
+    }
+
+    const [resume, cover_letter] = await Promise.all([
+      data.resume ? handleFileUpload(data.resume) : null,
+      data.cover_letter ? handleFileUpload(data.cover_letter) : null,
+    ]);
+
+    await db.insert(job_applications).values({
+      job_id: job.id,
+      user_id: user.id,
+      resume: resume?.id,
+      cover_letter: cover_letter?.id,
+    });
+
+    console.log("Job application submitted successfully");
+  } catch (error) {
+    console.error("Error processing job application:", error);
+    return null;
+  }
+}
+async function handleFileUpload(file: File) {
+  const uploadedFilename = await fileUpload(
+    file,
+    fileUploadType.document,
+    false,
+  );
+  return getFileByFilename(uploadedFilename);
+}
+export async function createPost(formData: FormData) {
+  const startups = await getUserStartups();
+  const parse = insertPostSchema.safeParse({
+    title: formData.get("title"),
+    media: (formData.get("media") as File)
+      ? (formData.get("media") as File)
+      : undefined,
+    is_pinned: formData.get("is_pinned"),
+    content: formData.get("content"),
+    startup_id: formData.get("startup_id"),
+  });
+  if (!parse.success) {
+    console.error("error parsing:", parse.error.errors);
+    return { message: "Invalid form data", error: parse.error.errors };
+  }
+  const { data } = parse;
+  if (!startups?.some((startup) => startup.id === data?.startup_id)) {
+    return "unallowed";
+  }
+
   const new_post = await db
     .insert(posts)
     .values({
-      content: data.postContent,
+      content: data.content,
       title: data.title,
-      is_pinned: data.markpinned,
-      createdByStartup: parseInt(data.author_id),
+      is_pinned: data.is_pinned,
+      startup_id: data.startup_id,
     })
     .returning({ id: posts.id });
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  const filename = await fileUpload(data.media);
+  const new_file = await db.query.files.findFirst({
+    where: eq(files.fileName, filename),
+  });
+
+  if (new_file && new_post[0]) {
+    await db.insert(postimages).values({
+      fileId: new_file.id,
+      postId: new_post[0]?.id,
+    });
+  }
   revalidatePath("/dashboard/startup/[id]", "page");
 
   return { id: new_post[0]?.id };
 }
 
-export async function createStartup(formData: FormData) {
-  console.log(formData.entries());
-  const schema = z.object({
-    name: z.string(),
-    description: z.string(),
-    foundedAt: z
-      .string()
-      .refine((date) => new Date(date).toISOString() !== "Invalid Date")
-      .default(() => new Date().toISOString()),
-    logo: fileSchema.optional(),
-  });
+export async function likePost(formData: FormData) {
+  const postId = formData.get("postId")?.toString();
+  if (!postId) throw new Error("No post id provided");
   const session = await getServerAuthSession();
+  if (!session) throw new Error("Unauthorized");
+  const post_like = await db.query.post_likes.findFirst({
+    where: and(
+      eq(post_likes?.post_id, postId),
+      eq(post_likes.user_id, session.user.id),
+    ),
+  });
+  if (post_like) {
+    console.log("hello please delete me ");
+    console.log(post_like.id);
+    await db.delete(post_likes).where(eq(post_likes.id, post_like.id));
+    revalidatePath(`/post/${post_like.id}`);
+    return;
+  }
+  await db.insert(post_likes).values({
+    post_id: postId,
+    user_id: session.user.id,
+  });
+
+  revalidatePath(`/post/${postId}`);
+}
+
+export async function addPostComment(
+  formData: z.infer<typeof insertPostCommentSchema>,
+) {
+  const data = insertPostCommentSchema.parse(formData);
+  if (!data) throw new Error("Invalid data");
+  await db.insert(post_comment).values({
+    user_id: data.user_id,
+    post_id: data.post_id,
+    content: data.content,
+  });
+  revalidatePath(`/post/${data.post_id}`);
+}
+
+export async function createStartup(formData: FormData) {
+  const session = await getServerAuthSession();
+
   if (!session) return { message: "Unauthorized" };
-  const parse = schema.safeParse({
+
+  console.log("session", formData);
+
+  const parse = insertStartupSchema.safeParse({
     name: formData.get("name"),
     description: formData.get("description"),
     foundedAt: formData.get("foundedAt"),
     logo: formData.get("logo"),
+    founderId: session.user.id,
   });
+
   if (!parse.success) {
     console.error("error parsing:", parse.error.errors);
     return { message: "Invalid form data" };
   }
-  const data = parse.data;
-  const { name, description, foundedAt, logo } = data;
+
+  const { name, description, foundedAt, logo } = parse.data;
+  const file = await fileUpload(logo);
   const new_startup = await db
     .insert(startups)
     .values({
-      name: name,
-      description: description,
+      name,
+      description,
       foundedAt: new Date(foundedAt),
-      logo: logo?.name ?? "default.png",
+      logo: file,
       founderId: session.user.id,
     })
     .returning({ id: startups.id })
@@ -191,6 +409,85 @@ export async function createStartup(formData: FormData) {
       console.error(e);
       return [];
     });
-  revalidatePath(`/dashboard/startups`);
-  redirect(`/dashboard/startup/${new_startup[0]?.id}`);
+  revalidatePath(`/dashboard/`);
+  redirect(`/startup/${new_startup[0]?.id}`);
+}
+
+export async function generateParticiaptionToken(roomid: string) {
+  const session = await getServerAuthSession();
+  if (!session) throw new Error("Unauthorized");
+  const room = await db.query.conferences.findFirst({
+    where: eq(conferences.id, roomid),
+  });
+  if (!room) throw new Error("Room not found");
+
+  const token = new AccessToken(env.LIVEKIT_API_KEY, env.LIVEKIT_API_SECRET, {
+    identity: session.user.id,
+    ttl: "20m",
+  });
+
+  token.addGrant({
+    roomJoin: true,
+    room: roomid,
+    canPublish: false,
+    canPublishData: true,
+  });
+
+  const is_founder = await isFounder(room.startup_id);
+
+  if (is_founder) {
+    token.addGrant({ roomJoin: true, room: roomid, canPublish: true });
+  }
+
+  return token.toJwt();
+}
+
+enum fileUploadType {
+  image,
+  video,
+  document,
+}
+
+export async function fileUpload(
+  data: globalThis.File | undefined,
+  type: fileUploadType = fileUploadType.image,
+  with_moderation = true,
+) {
+  if (!data) throw new Error("No file provided");
+  let moderation = null;
+  if (with_moderation) {
+    const moderation_form_data = new FormData();
+    switch (type) {
+      case fileUploadType.image:
+        moderation_form_data.append("image", data as Blob);
+        moderation = await image_moderation_request(moderation_form_data);
+        break;
+      case fileUploadType.video:
+        moderation_form_data.append("video", data as Blob);
+        moderation = await image_moderation_request(moderation_form_data);
+        break;
+      case fileUploadType.document:
+        moderation_form_data.append("document", data as Blob);
+        break;
+    }
+  }
+  const id = nanoid();
+  const filename = `${id}.${data.type.split("/")[1]}`;
+
+  const file = Buffer.from(await data.arrayBuffer());
+
+  await saveFileInBucket({
+    bucketName: "startpad",
+    fileName: filename,
+    file,
+  });
+
+  await db.insert(files).values({
+    originalName: data.name,
+    fileName: filename,
+    size: data.size,
+    bucket: "startpad",
+    moderation_id: moderation?.task_id ?? "",
+  });
+  return filename;
 }

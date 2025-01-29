@@ -6,7 +6,7 @@ import React from "react";
 export default function SettingsNavBar() {
   const pathname = usePathname();
   const links = [
-    { href: "/dashboard/settings/profile", text: "General", id: 1 },
+    { href: "/dashboard/settings/", text: "General", id: 1 },
     { href: "/dashboard/settings/security", text: "Security", id: 2 },
     { href: "#", text: "Integrations", id: 3 },
     { href: "#", text: "Support", id: 4 },
@@ -15,7 +15,7 @@ export default function SettingsNavBar() {
   return (
     <nav
       className="grid gap-4 text-sm text-muted-foreground"
-      x-chunk="dashboard-04-chunk-0"
+      
     >
       {links.map((link) => (
         <Link

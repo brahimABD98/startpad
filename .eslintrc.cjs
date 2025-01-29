@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const path = require("path");
+
 /** @type {import("eslint").Linter.Config} */
 const config = {
   ignorePatterns: [
@@ -12,7 +15,7 @@ const config = {
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
-    project: true,
+    project: path.join(__dirname, "./tsconfig.json"),
   },
   plugins: ["@typescript-eslint", "drizzle"],
   extends: [
@@ -21,6 +24,7 @@ const config = {
     "plugin:@typescript-eslint/stylistic-type-checked",
   ],
   rules: {
+    semi: ["warn"],
     "no-restricted-imports": ["error", { patterns: ["@radix-ui/*"] }],
     "@typescript-eslint/array-type": "off",
     "@typescript-eslint/consistent-type-definitions": "off",

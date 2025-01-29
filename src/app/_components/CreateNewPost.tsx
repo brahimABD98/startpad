@@ -15,47 +15,51 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { type SubmitHandler, useForm } from "react-hook-form";
-import { CreateNewPostSchema } from "@/lib/formSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import type { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { UserWithStartups } from "@/server/db/schema";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-export default function CreateNewPost({ user }: { user: UserWithStartups }) {
+import { insertPostSchema } from "@/server/db/schema";
+export default function CreateNewPost({ startup_id }: Readonly<{ startup_id: string }>) {
   const [content, setContent] = useState("");
 
-  type Inputs = z.infer<typeof CreateNewPostSchema>;
-  useEffect(() => {
-    setValue("postContent", content);
-  }, [content]);
+  type Inputs = z.infer<typeof insertPostSchema>;
   const form = useForm<Inputs>({
-    resolver: zodResolver(CreateNewPostSchema),
+    resolver: zodResolver(insertPostSchema),
+    defaultValues: {
+      media: undefined,
+    },
   });
-  const { setValue } = form;
+  const { setValue, formState } = form;
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    await createPost(data)
+    console.log("media media", data.media);
+    const formData = new FormData();
+    formData.append("title", data.title);
+    formData.append("content", data.content);
+    formData.append("startup_id", startup_id);
+    formData.append("is_pinned", data.is_pinned ? "true" : "false");
+    if (data.media) {
+      formData.append("media", data.media as Blob);
+    }
+    await createPost(formData)
       .then((v) => {
         console.log(v);
         setContent("");
-        localStorage.removeItem("textEditorData");
         form.reset({
           title: "",
-          markpinned: false,
-          postContent: "",
-          author_id: "",
+          is_pinned: false,
+          content: "",
+          media: undefined,
         });
       })
       .catch(() => console.log("error"));
   };
+  useEffect(() => {
+    setValue("startup_id", startup_id);
+  }, [startup_id, setValue]);
 
+  useEffect(() => {
+    setValue("content", content);
+  }, [content, setValue]);
   return (
     <Card>
       <Form {...form}>
@@ -63,13 +67,13 @@ export default function CreateNewPost({ user }: { user: UserWithStartups }) {
           <CardHeader>
             <h3 className="mb-4 text-lg font-semibold">Create a new post</h3>
             <FormField
-              name="markpinned"
+              name="is_pinned"
               control={form.control}
               render={({ field }) => (
                 <FormItem className="flex flex-row">
                   <FormControl>
                     <Checkbox
-                      checked={field.value}
+                      checked={field.value!}
                       onCheckedChange={field.onChange}
                       className="mr-2 h-7 w-7 "
                     />
@@ -90,16 +94,16 @@ export default function CreateNewPost({ user }: { user: UserWithStartups }) {
                   <FormControl>
                     <Input {...field} className="mr-2 h-7 w-full md:w-1/2 " />
                   </FormControl>
-                  <FormLabel>Mark this as pinned</FormLabel>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <div className="flex items-start space-x-4">
               <div className="flex-1">
                 <TextEditor content={content} setContent={setContent} />
                 <FormField
-                  name="postContent"
+                  name="content"
                   control={form.control}
                   render={({}) => (
                     <FormItem>
@@ -107,49 +111,37 @@ export default function CreateNewPost({ user }: { user: UserWithStartups }) {
                     </FormItem>
                   )}
                 />
+                <FormField
+                  name="media"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Media</FormLabel>
+                      <FormControl>
+                        <Input
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              field.onChange(file); // Update the form state with the selected file
+                            } else {
+                              field.onChange(undefined);
+                            }
+                          }}
+                          type="file"
+                          id="media"
+                          onBlur={field.onBlur}
+                          ref={field.ref}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <div className="mt-2 flex items-center justify-end space-x-2">
-                  <Button size="sm" type="submit">
-                    Post
+                  <Button disabled={formState.isSubmitting} type="submit">
+                    {formState.isSubmitting ? "Posting..." : "Post"}
                   </Button>
-                  <FormField
-                    name="author_id"
-                    control={form.control}
-                    render={({ field }) => (
-                      <>
-                        <FormItem>
-                          <FormControl>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Post as" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectGroup>
-                                  <SelectItem value={user.id}>
-                                    {user.name}
-                                  </SelectItem>
-                                </SelectGroup>
-                                <SelectGroup>
-                                  {user.startups.map((startup) => (
-                                    <SelectItem
-                                      key={`${startup.id}`}
-                                      value={`${startup.id}`}
-                                    >
-                                      {startup.name}
-                                    </SelectItem>
-                                  ))}
-                                </SelectGroup>
-                              </SelectContent>
-                            </Select>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      </>
-                    )}
-                  />
                 </div>
               </div>
             </div>

@@ -1,15 +1,18 @@
 import React, { Suspense } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { TabsTrigger, TabsList, TabsContent, Tabs } from "@/components/ui/tabs";
 import { CardHeader, CardContent, Card } from "@/components/ui/card";
 import { Mountain } from "lucide-react";
 import CreateNewPost from "@/app/_components/CreateNewPost";
-import { getStartupInfo, getUserWithStartups } from "@/server/queries";
+import { getStartupInfo, isFounder } from "@/server/queries";
 import { DisplayAllPosts } from "@/app/_components/DisplayAllPosts";
 import { Announcements } from "@/app/_components/Announcements";
 import { StartupGallery } from "@/app/startup/StartupGallery";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DisplayServerImages } from "@/app/_components/DisplayServerImages";
+import JobSection from "../JobSection";
+import CreateConference from "@/app/_components/CreateConference";
+import DisplayConferences from "@/app/_components/DisplayConferences";
 function GallerySkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -19,22 +22,20 @@ function GallerySkeleton() {
     </div>
   );
 }
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page({ params }: Readonly<{ params: { id: string } }>) {
   const startup_info = await getStartupInfo(params.id);
   if (!startup_info) return null;
-  const user = await getUserWithStartups();
-  if (!user) return null;
-  const is_owner = startup_info?.founderId === user?.id;
+  const is_founder = await isFounder(params.id);
   return (
     <div className="flex min-h-screen flex-col">
       <header className="relative bg-gray-100 px-6 py-4 text-gray-900 dark:bg-gray-800 dark:text-gray-100 md:px-8 md:py-6">
         <div className="container mx-auto">
           <div className="relative h-48 w-full">
-            <Image
-              alt="Cover image"
-              className="h-[480px] w-full rounded-lg object-cover"
-              src="/placeholder.svg"
-              layout="fill"
+            <DisplayServerImages
+              src={startup_info?.logo}
+              width={200}
+              height={100}
+              alt={startup_info?.name}
             />
             <div className="absolute bottom-4 left-4 flex items-center space-x-2">
               <div className="overflow-hidden rounded-lg border-2 border-gray-200 dark:border-gray-700">
@@ -55,9 +56,11 @@ export default async function Page({ params }: { params: { id: string } }) {
               <TabsTrigger value="all-posts">All Posts</TabsTrigger>
               <TabsTrigger value="announcements">Announcements</TabsTrigger>
               <TabsTrigger value="gallery">Gallery</TabsTrigger>
+              <TabsTrigger value="jobs">Jobs</TabsTrigger>
+              <TabsTrigger value="conference">Conferences</TabsTrigger>
             </TabsList>
             <TabsContent className="mt-8" value="all-posts">
-              {is_owner && <CreateNewPost user={user} />}
+              {is_founder && <CreateNewPost startup_id={startup_info?.id} />}
 
               <Card className="mt-8">
                 <CardHeader>
@@ -82,6 +85,17 @@ export default async function Page({ params }: { params: { id: string } }) {
             <TabsContent className="mt-8" value="gallery">
               <Suspense fallback={<GallerySkeleton />}>
                 <StartupGallery startup={startup_info} />
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="jobs">
+              <JobSection id={params.id} />
+            </TabsContent>
+            <TabsContent value="conference">
+              {is_founder && (
+                <CreateConference startup_id={params.id} />
+              )}
+              <Suspense fallback={<div>Loading conferences...</div>}>
+                <DisplayConferences startup_id={params.id} />
               </Suspense>
             </TabsContent>
           </Tabs>

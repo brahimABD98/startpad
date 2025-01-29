@@ -11,11 +11,10 @@ import React from "react";
 import { DisplayPostContent } from "./DisplayTextEditorContent";
 import GetAvatar from "./GetAvatar";
 
-export async function Announcements({ startup }: { startup: SelectStartups }) {
+export async function Announcements({ startup }: Readonly<{ startup: SelectStartups }>) {
   const announcements = await getStartupAnnouncements(startup);
   return (
-    <>
-      <Card>
+    <Card>
         <CardHeader>
           <h3 className="mb-4 text-lg font-semibold">Pinned Announcements</h3>
         </CardHeader>
@@ -52,6 +51,5 @@ export async function Announcements({ startup }: { startup: SelectStartups }) {
           </div>
         </CardContent>
       </Card>
-    </>
   );
 }

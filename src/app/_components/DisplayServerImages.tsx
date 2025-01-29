@@ -22,7 +22,7 @@ export async function DisplayServerImages({
   },
   className = "rounded-lg object-cover",
   ...props
-}: Props) {
+}: Readonly<Props>) {
   const image_url = await getImageURL(src);
   return (
     <Image

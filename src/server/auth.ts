@@ -12,7 +12,6 @@ import { db } from "@/server/db";
 import { createTable } from "@/server/db/schema";
 import GitHubProvider from "next-auth/providers/github";
 
-
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -23,6 +22,7 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      role: string;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
@@ -30,6 +30,7 @@ declare module "next-auth" {
 
   interface User {
     phoneNumber?: string;
+    role: string;
     // ...other properties
     // role: UserRole;
   }
@@ -47,6 +48,7 @@ export const authOptions: NextAuthOptions = {
       user: {
         ...session.user,
         id: user.id,
+        role: session.user.role,
       },
     }),
   },
@@ -55,14 +57,14 @@ export const authOptions: NextAuthOptions = {
     DiscordProvider({
       clientId: env.DISCORD_CLIENT_ID,
       clientSecret: env.DISCORD_CLIENT_SECRET,
-    }),  
+    }),
     GoogleProvider({
-      clientId:env.GOOGLE_CLIENT_ID,
-      clientSecret:env.GOOGLE_CLIENT_SECRET,
+      clientId: env.GOOGLE_CLIENT_ID,
+      clientSecret: env.GOOGLE_CLIENT_SECRET,
     }),
     GitHubProvider({
-      clientId:env.GITHUB_CLIENT_ID,
-      clientSecret:env.GITHUB_CLIENT_SECRET,
+      clientId: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
     }),
     /**
      * ...add more providers here.
