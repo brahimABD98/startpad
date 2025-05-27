@@ -41,7 +41,6 @@ export async function dashboardSearch(text: string) {
     return [];
   }
   const sanitizedText = text.toString().trim();
-  console.log("sanitizedText", sanitizedText);
   const search = await db
     .select()
     .from(startups)

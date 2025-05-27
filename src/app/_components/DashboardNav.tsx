@@ -1,8 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 import Image from "next/image";
-import { SheetTrigger, SheetContent, Sheet } from "@/components/ui/sheet";
+import { usePathname } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -18,34 +21,55 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import Link from "next/link";
-import React, { useEffect, useState } from "react";
 import {
   HelpCircleIcon,
   LogOut,
   Menu,
-  Package2,
+  RocketIcon,
   Search,
   Settings,
   User,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { dashboardSearch } from "@/server/actions";
-import type { SelectStartups } from "@/server/db/schema";
 import { CommandLoading } from "cmdk";
+import type { SelectStartups } from "@/server/db/schema";
+import { getImageURL } from "@/server/queries";
+import ClientImage from "./ClientImage";
+
+const navLinks = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/startup", label: "Startup" },
+  { href: "/dashboard/settings", label: "Settings" },
+];
 
 const DashboardNav = ({ logo }: { logo?: string }) => {
+  const pathname = usePathname();
+  const getNavLinkClass = (href: string) => {
+    const isActive = pathname === href || pathname.startsWith(href + "/");
+    return `transition-colors hover:text-foreground ${
+      isActive ? "text-foreground" : "text-muted-foreground"
+    }`;
+  };
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [searchResults, setSearchResults] = useState<SelectStartups[]>([]);
+
   const handleSearch = async (text: string) => {
-    setLoading(true);
-    const results = await dashboardSearch(text);
-    if (results) setSearchResults([...results]);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const results = await dashboardSearch(text);
+      if (results) {
+        setSearchResults(results);
+      }
+    } catch (error) {
+      console.error("Search failed:", error);
+      setSearchResults([]);
+    } finally {
+      setLoading(false);
+    }
   };
-  console.log(searchResults);
+
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -53,7 +77,6 @@ const DashboardNav = ({ logo }: { logo?: string }) => {
         setOpen((open) => !open);
       }
     };
-
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
@@ -65,29 +88,16 @@ const DashboardNav = ({ logo }: { logo?: string }) => {
           href="/dashboard"
           className="flex items-center gap-2 text-lg font-semibold md:text-base"
         >
-          <Package2 className="h-6 w-6" />
-          <span className="sr-only">Acme Inc</span>
+          <RocketIcon className="h-6 w-6" />
+          <span className="sr-only">Startpad</span>
         </Link>
-        <Link
-          href="/dashboard"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Dashboard
-        </Link>
-        <Link
-          href="/startup"
-          className="text-muted-foreground transition-colors hover:text-foreground"
-        >
-          Startup
-        </Link>
-
-        <Link
-          href="#"
-          className="text-foreground transition-colors hover:text-foreground"
-        >
-          Settings
-        </Link>
+        {navLinks.map(({ href, label }) => (
+          <Link key={href} href={href} className={getNavLinkClass(href)}>
+            {label}
+          </Link>
+        ))}
       </nav>
+
       <Sheet>
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="shrink-0 md:hidden">
@@ -99,33 +109,21 @@ const DashboardNav = ({ logo }: { logo?: string }) => {
           <nav className="grid gap-6 text-lg font-medium">
             <Link
               href="/dashboard"
-              className="flex items-center  gap-2 text-lg font-semibold md:text-base"
+              className="flex items-center gap-2 text-lg font-semibold md:text-base"
             >
-              <Package2 className="h-6 w-6" />
-              <span className="sr-only">Acme Inc</span>
+              <RocketIcon className="h-6 w-6" />
+              <span className="sr-only">Startpad</span>
             </Link>
-            <Link
-              href="/dashboard"
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="#"
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Startup
-            </Link>
-            <Link
-              href="#"
-              className="text-foreground transition-colors hover:text-foreground"
-            >
-              Settings
-            </Link>
+            {navLinks.map(({ href, label }) => (
+              <Link key={href} href={href} className={getNavLinkClass(href)}>
+                {label}
+              </Link>
+            ))}
           </nav>
         </SheetContent>
       </Sheet>
-      <div className="flex w-full  justify-end gap-4  md:ml-auto md:gap-2 lg:gap-4">
+
+      <div className="flex w-full justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
         <div>
           <Button
             variant="outline"
@@ -146,15 +144,36 @@ const DashboardNav = ({ logo }: { logo?: string }) => {
               placeholder="Type a command or search..."
             />
             <CommandList>
-              {loading && <CommandLoading>loading ...</CommandLoading>}
-              <CommandSeparator />
-              <div>
-                {searchResults.map((result) => (
-                  <CommandItem key={result.founderId}>
-                    <span>{result.logo}</span>
-                  </CommandItem>
-                ))}
-              </div>
+              {loading && <CommandLoading>Searching...</CommandLoading>}
+              {!loading && searchResults.length === 0 && (
+                <div className="py-6 text-center text-sm">No results found</div>
+              )}
+              {searchResults.map((result) => (
+                <CommandItem
+                  key={result.id}
+                  value={result.name}
+                  onSelect={() => {
+                    // Handle selection
+                    setOpen(false);
+                  }}
+                >
+                  <Link
+                    href={`/startup/${result.id}`}
+                    className="flex w-full items-center"
+                  >
+                    {result.logo && (
+                      <ClientImage
+                        src={result.logo}
+                        width={24}
+                        height={24}
+                        alt={result.name}
+                        className="mr-2 rounded"
+                      />
+                    )}
+                    <span>{result.name}</span>
+                  </Link>
+                </CommandItem>
+              ))}
             </CommandList>
           </CommandDialog>
         </div>

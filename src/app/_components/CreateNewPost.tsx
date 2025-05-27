@@ -31,7 +31,6 @@ export default function CreateNewPost({ startup_id }: Readonly<{ startup_id: str
   });
   const { setValue, formState } = form;
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log("media media", data.media);
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("content", data.content);

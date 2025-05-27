@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { getServerAuthSession } from "@/server/auth";
-import { Rocket } from "lucide-react";
+import { RocketIcon } from "lucide-react";
 import Link from "next/link";
 export async function Header() {
   const session = await getServerAuthSession();
@@ -8,7 +8,7 @@ export async function Header() {
   return (
     <header className="flex h-14 items-center px-4 lg:px-6">
       <Link className="flex items-center justify-center" href="#">
-        <Rocket className="mr-2 h-6 w-6" />
+        <RocketIcon className="mr-2 h-6 w-6" />
         <span className="font-bold">Startpad</span>
       </Link>
       <nav className="ml-auto flex gap-4 sm:gap-6">

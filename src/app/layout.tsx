@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-sync-scripts */
 import "@/styles/globals.css";
 
 import { Inter } from "next/font/google";
@@ -21,6 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <script src="https://unpkg.com/react-scan/dist/auto.global.js" />
+      </head>
       <body className={`font-sans ${inter.variable}`}>
         <NuqsAdapter>{children}</NuqsAdapter>
       </body>

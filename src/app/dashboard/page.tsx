@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Home, ListFilter, Settings, Users } from "lucide-react";
+import { Home, ListFilter } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,12 +20,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { getServerAuthSession } from "@/server/auth";
 import { getImageURL, getUserStartups } from "@/server/queries";
 import DashboardNav from "../_components/DashboardNav";
@@ -35,7 +29,6 @@ import { redirect } from "next/navigation";
 import DashboardSideBar from "../_components/DashboardSideBar";
 export default async function Page() {
   const session = await getServerAuthSession();
-  console.log(session);
   if (!session?.user) return redirect("/signin");
   const startups = await getUserStartups();
   const image_url = await getImageURL(session.user.image);

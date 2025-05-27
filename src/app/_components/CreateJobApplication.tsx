@@ -40,7 +40,6 @@ function JobApplication({
   });
   const { setValue, formState } = form;
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log("data", data);
     const formdata = new FormData();
     if (data.cover_letter) {
       formdata.append("cover_letter", data.cover_letter);
